@@ -4,6 +4,7 @@ import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.son.sonstudy.domain.product.model.submodel.ProductColor;
 
 import java.time.LocalDateTime;
 

@@ -1,4 +1,4 @@
-package org.son.sonstudy.domain.product.model;
+package org.son.sonstudy.domain.product.model.submodel;
 
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
