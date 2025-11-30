@@ -27,8 +27,9 @@ public class Product {
     @Column(nullable = false)
     private int size;
 
-    @Column(nullable = false)
-    private String color;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "color_id")
+    private ProductColor color;
 
     @Column(nullable = false)
     private String imageUrl;
