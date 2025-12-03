@@ -10,7 +10,8 @@ public enum ErrorCode {
     NOT_FOUND("DC404_001", HttpStatus.NOT_FOUND, "데이터 없음"),
 
     // USER
-    USER_NOT_FOUND("DC404_101", HttpStatus.NOT_FOUND, "존재하지 않는 유저");
+    USER_NOT_FOUND("DC404_101", HttpStatus.NOT_FOUND, "존재하지 않는 유저"),
+    EMAIL_DUPLICATE("DC409_101", HttpStatus.CONFLICT, "이미 존재하는 이메일");
 
     private final String code;
     private final HttpStatus httpStatus;

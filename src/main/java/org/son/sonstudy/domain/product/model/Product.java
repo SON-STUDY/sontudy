@@ -4,7 +4,7 @@ import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.son.sonstudy.domain.product.model.submodel.ProductColor;
+import org.son.sonstudy.domain.product.model.submodel.Color;
 
 import java.time.LocalDateTime;
 
@@ -30,7 +30,7 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "color_id")
-    private ProductColor color;
+    private Color color;
 
     @Column(nullable = false)
     private String imageUrl;

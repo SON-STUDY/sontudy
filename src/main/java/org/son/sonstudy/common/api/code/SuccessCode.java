@@ -7,7 +7,11 @@ import org.springframework.http.HttpStatus;
 public enum SuccessCode {
     // COMMON
     OK("DC200_001", HttpStatus.OK, "요청 성공"),
-    CREATED("DC201_002", HttpStatus.CREATED, "생성 성공");
+    CREATED("DC201_002", HttpStatus.CREATED, "생성 성공"),
+
+    // USER
+    LOGIN("DC201_101", HttpStatus.OK, "로그인 성공"),
+    SIGN_UP("DC201_102", HttpStatus.CREATED, "회원가입 성공");
 
     private final String code;
     private final HttpStatus httpStatus;
