@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "product_color")
+@Table(name = "color")
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-public class ProductColor {
+public class Color {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -15,7 +15,7 @@ public class ProductColor {
 
     private String colorName;
 
-    public ProductColor(String hexCode, String colorName) {
+    public Color(String hexCode, String colorName) {
         this.hexCode = hexCode;
         this.colorName = colorName;
     }
