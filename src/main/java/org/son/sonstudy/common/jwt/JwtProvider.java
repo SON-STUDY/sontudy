@@ -1,4 +1,4 @@
-package org.son.sonstudy.infra.jwt;
+package org.son.sonstudy.common.jwt;
 
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;

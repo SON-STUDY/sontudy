@@ -7,7 +7,7 @@ import org.son.sonstudy.domain.auth.model.CustomUserDetail;
 import org.son.sonstudy.domain.user.model.Role;
 import org.son.sonstudy.domain.user.model.User;
 import org.son.sonstudy.domain.user.repository.UserRepository;
-import org.son.sonstudy.infra.jwt.JwtProvider;
+import org.son.sonstudy.common.jwt.JwtProvider;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
