@@ -11,7 +11,11 @@ public enum ErrorCode {
 
     // USER
     USER_NOT_FOUND("DC404_101", HttpStatus.NOT_FOUND, "존재하지 않는 유저"),
-    EMAIL_DUPLICATE("DC409_101", HttpStatus.CONFLICT, "이미 존재하는 이메일");
+    EMAIL_DUPLICATE("DC409_101", HttpStatus.CONFLICT, "이미 존재하는 이메일"),
+
+    // AUTH
+    FORBIDDEN_ACCESS("DC403_001", HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+    NOT_SELLER("DC403_002", HttpStatus.FORBIDDEN, "판매자 권한이 필요합니다.");
 
     private final String code;
     private final HttpStatus httpStatus;
