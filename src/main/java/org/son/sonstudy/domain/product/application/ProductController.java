@@ -19,8 +19,8 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping("/registration")
-    public ResponseEntity<ApiResponse<Void>> registProduct(@RequestBody ProductRegistrationRequest request) {
-        productService.registProduct(request);
+    public ResponseEntity<ApiResponse<Void>> registerProduct(@RequestBody ProductRegistrationRequest request) {
+        productService.registerProduct(request);
 
         return ApiResponse.success(SuccessCode.OK);
     }

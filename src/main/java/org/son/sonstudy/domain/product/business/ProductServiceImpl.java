@@ -24,7 +24,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void registProduct(ProductRegistrationRequest request) {
+    public void registerProduct(ProductRegistrationRequest request) {
         User currentUser = SecurityUtils.getCurrentUser();
         validateSeller(currentUser);
 
