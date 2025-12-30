@@ -37,9 +37,6 @@ public class Product {
     @Column(nullable = false)
     private String imageUrl;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<ProductOption> options = new ArrayList<>();
-
     @Column(nullable = false)
     private LocalDateTime releasedAt;
 
@@ -48,6 +45,9 @@ public class Product {
 
     @Enumerated(EnumType.STRING)
     private ProductStatus status;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductOption> options = new ArrayList<>();
 
     @Builder
     private Product(String name, String description, int cost, Color color,
