@@ -29,7 +29,7 @@ public record ProductRegistrationRequest(
 
         String imageUrl,
 
-        @NotBlank(message = "드랍 시간은 필수입니다.")
+        @NotNull(message = "드랍 시간은 필수입니다.")
         LocalDateTime relasedAt,
 
         @NotNull(message = "카테고리는 필수입니다.")
