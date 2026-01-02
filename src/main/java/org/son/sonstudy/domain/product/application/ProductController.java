@@ -1,5 +1,6 @@
 package org.son.sonstudy.domain.product.application;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.SuccessCode;
 import org.son.sonstudy.common.api.response.ApiResponse;
@@ -19,7 +20,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping("/registration")
-    public ResponseEntity<ApiResponse<Void>> registerProduct(@RequestBody ProductRegistrationRequest request) {
+    public ResponseEntity<ApiResponse<Void>> registerProduct(@RequestBody @Valid ProductRegistrationRequest request) {
         productService.registerProduct(request);
 
         return ApiResponse.success(SuccessCode.OK);
