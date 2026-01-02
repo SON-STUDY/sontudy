@@ -38,4 +38,13 @@ public record ApiResponse<T>(
                         null
                 ));
     }
+
+    public static <T> ResponseEntity<ApiResponse<T>> fail(ErrorCode errorCode, String message) {
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(new ApiResponse<>(
+                        errorCode.getCode(),
+                        message,
+                        null));
+    }
 }
