@@ -1,6 +1,7 @@
 package org.son.sonstudy.domain.auth.model;
 
 import lombok.RequiredArgsConstructor;
+import org.son.sonstudy.common.jwt.UserContext;
 import org.son.sonstudy.domain.user.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,6 +32,14 @@ public class CustomUserDetail implements UserDetails {
     @Override
     public String getUsername() {
         return this.user.getEmail();
+    }
+
+    public UserContext toUserContext() {
+        return new UserContext(
+                user.getId(),
+                user.getEmail(),
+                user.getRole()
+        );
     }
 
     @Override
