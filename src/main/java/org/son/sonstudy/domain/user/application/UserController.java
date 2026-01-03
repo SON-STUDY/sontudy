@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.SuccessCode;
 import org.son.sonstudy.common.api.response.ApiResponse;
-import org.son.sonstudy.common.jwt.UserContext;
+import org.son.sonstudy.common.jwt.data.UserContext;
 import org.son.sonstudy.domain.user.application.request.LoginRequest;
 import org.son.sonstudy.domain.user.application.request.SignUpRequest;
 import org.son.sonstudy.domain.user.business.UserService;

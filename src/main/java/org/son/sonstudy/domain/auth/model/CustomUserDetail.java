@@ -1,7 +1,7 @@
 package org.son.sonstudy.domain.auth.model;
 
 import lombok.RequiredArgsConstructor;
-import org.son.sonstudy.common.jwt.UserContext;
+import org.son.sonstudy.common.jwt.data.UserContext;
 import org.son.sonstudy.domain.user.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

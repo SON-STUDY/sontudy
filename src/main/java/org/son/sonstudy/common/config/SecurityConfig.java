@@ -1,8 +1,8 @@
 package org.son.sonstudy.common.config;
 
 import lombok.RequiredArgsConstructor;
-import org.son.sonstudy.common.jwt.JwtAuthenticationEntryPoint;
-import org.son.sonstudy.common.jwt.JwtAuthenticationFilter;
+import org.son.sonstudy.common.jwt.filter.JwtAuthenticationEntryPoint;
+import org.son.sonstudy.common.jwt.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
