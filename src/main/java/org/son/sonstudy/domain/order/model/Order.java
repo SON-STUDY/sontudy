@@ -11,7 +11,7 @@ import org.son.sonstudy.domain.user.model.User;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "order")
+@Table(name = "orders")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order {
     @Id
