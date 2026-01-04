@@ -27,8 +27,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             HttpServletResponse response,
             AuthenticationException authException
     ) {
-        // 필터에서 예외가 처리되지 않고 여기까지 왔다는 것은 '토큰이 아예 없는' 경우입니다.
-        // 따라서 '인증되지 않은 유저' 에러를 공통 예외 처리기로 던집니다.
         resolver.resolveException(request, response, null, new CustomException(ErrorCode.UNAUTHORIZED_TOKEN));
     }
 }

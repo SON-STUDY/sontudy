@@ -68,7 +68,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            e.printStackTrace();
             exceptionResolver.resolveException(request, response, null, new CustomException(ErrorCode.INVALID_TOKEN_FORMAT));
         }
     }
