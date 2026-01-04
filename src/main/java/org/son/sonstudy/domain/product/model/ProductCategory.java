@@ -7,5 +7,6 @@ public enum ProductCategory {
     SNEAKERS,
     LOAFERS,
     SANDALS,
-    BOOTS
+    BOOTS,
+    ETC
 }
