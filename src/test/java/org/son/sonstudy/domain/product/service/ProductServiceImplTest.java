@@ -1,9 +1,9 @@
 package org.son.sonstudy.domain.product.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.son.sonstudy.common.exception.CustomException;
 import org.son.sonstudy.common.util.SecurityUtils;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
 import org.son.sonstudy.domain.product.business.ProductService;
@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mockStatic;
 
 @SpringBootTest
@@ -68,6 +69,35 @@ public class ProductServiceImplTest {
                 assertThat(products.get(0).getOptions().get(0).getSize()).isEqualTo(250);
 
                 assertThat(products.get(0).getColor().getColorName()).isEqualTo("Black");
+            }
+        }
+
+        @Test
+        void 유저_역할이_SELLER가_아닌_경우_예외가_발생한다() {
+            User user = User.builder().role(Role.USER).build();
+
+            ProductRegistrationRequest.OptionRequest option =
+                    new ProductRegistrationRequest.OptionRequest(250, 100);
+
+            ProductRegistrationRequest request = new ProductRegistrationRequest(
+                    "테스트 신발",
+                    "테스트 신발입니다.",
+                    150000,
+                    "Black",
+                    "#000000",
+                    "http://testimage.url",
+                    LocalDateTime.now(),
+                    ProductCategory.SNEAKERS,
+                    List.of(option));
+
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUser).thenReturn(user);
+
+                // when & then
+                assertThatThrownBy(() -> productService.registerProduct(request))
+                        .isInstanceOf(CustomException.class)
+                        .hasMessage("판매자 권한이 필요합니다.");
+
             }
         }
     }
