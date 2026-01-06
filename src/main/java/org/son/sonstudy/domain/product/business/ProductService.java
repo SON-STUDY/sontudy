@@ -4,5 +4,5 @@ import org.son.sonstudy.domain.product.application.request.ProductRegistrationRe
 
 public interface ProductService {
 
-    void registerProduct(ProductRegistrationRequest request);
+    void register(ProductRegistrationRequest request);
 }
