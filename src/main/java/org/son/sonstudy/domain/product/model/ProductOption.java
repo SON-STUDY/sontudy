@@ -18,15 +18,24 @@ public class ProductOption {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @Column(nullable = false)
     private int size;
+
+    @Column(nullable = false)
+    private int cost;
+
+    @Column(nullable = false)
     private int stock;
-    private int totalSales;
+
+    @Column(nullable = false)
+    private Long totalSales;
 
     @Builder
-    public ProductOption(String id, int size, int stock, int totalSales) {
+    public ProductOption(String id, int size, int cost, int stock) {
         this.id = id;
         this.size = size;
+        this.cost = cost;
         this.stock = stock;
-        this.totalSales = totalSales;
+        this.totalSales = 0L;
     }
 }
