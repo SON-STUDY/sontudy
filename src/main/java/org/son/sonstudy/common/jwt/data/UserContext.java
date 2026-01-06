@@ -12,7 +12,7 @@ public record UserContext(
         return new UserContext(userId, email, role);
     }
 
-    public static UserContext of(User user) {
+    public static UserContext from(User user) {
         return new UserContext(
                 user.getId(),
                 user.getEmail(),
