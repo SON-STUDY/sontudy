@@ -5,7 +5,7 @@ import org.son.sonstudy.domain.user.model.User;
 
 public record UserContext(
         String userId,
-        String email,
+        String name,
         Role role
 ) {
     public static UserContext of(String userId, String email, Role role) {
@@ -15,7 +15,7 @@ public record UserContext(
     public static UserContext from(User user) {
         return new UserContext(
                 user.getId(),
-                user.getEmail(),
+                user.getName(),
                 user.getRole()
         );
     }
