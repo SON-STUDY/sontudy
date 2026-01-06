@@ -23,6 +23,10 @@ public class JwtProvider {
         return generateToken(user, jwtProperties.refreshTokenExpireIn());
     }
 
+    public String generateSuperToken(User user) {
+        return  generateToken(user, jwtProperties.superTokenExpireIn());
+    }
+
     private String generateToken(User user, long expiration) {
         long expiredAt = System.currentTimeMillis() + expiration;
 
