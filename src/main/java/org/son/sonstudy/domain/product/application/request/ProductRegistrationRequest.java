@@ -18,9 +18,6 @@ public record ProductRegistrationRequest(
         @NotBlank(message = "상품 설명은 필수입니다.")
         String description,
 
-        @Min(value = 0, message = "가격은 0원 이상이어야 합니다.")
-        int cost,
-
         @NotBlank(message = "색상 이름은 필수입니다.")
         String colorName,
 
@@ -41,10 +38,13 @@ public record ProductRegistrationRequest(
 
 ) {
         public record OptionRequest(
-                @Min(value = 150, message = "사이즈는 필수입니다.(100 이상)")
+                @Min(value = 0, message = "사이즈에 음수를 입력할 수 없습니다.")
                 int size,
 
-                @Min(value = 1, message = "재고는 1개 이상이어야 합니다.")
+                @Min(value = 0, message = "가격에 음수를 입력할 수 없습니다.")
+                int cost,
+
+                @Min(value = 0, message = "재고에 음수를 입력할 수 없습니다.")
                 int stock
         ) {}
 }

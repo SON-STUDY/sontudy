@@ -20,8 +20,8 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping("/registration")
-    public ResponseEntity<ApiResponse<Void>> registerProduct(@RequestBody @Valid ProductRegistrationRequest request) {
-        productService.registerProduct(request);
+    public ResponseEntity<ApiResponse<Void>> register(@RequestBody @Valid ProductRegistrationRequest request) {
+        productService.register(request);
 
         return ApiResponse.success(SuccessCode.OK);
     }
