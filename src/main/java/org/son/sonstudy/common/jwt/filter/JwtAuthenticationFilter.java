@@ -19,7 +19,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -70,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            exceptionResolver.resolveException(request, response, null, new CustomException(ErrorCode.INVALID_TOKEN_FORMAT));
+            exceptionResolver.resolveException(request, response, null, e);
         }
     }
 
@@ -82,8 +81,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
                         userContext,
-                        authorities,
-                        Collections.emptyList());
+                        null,
+                        authorities);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
