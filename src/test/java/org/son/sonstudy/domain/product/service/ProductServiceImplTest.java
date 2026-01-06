@@ -42,12 +42,11 @@ public class ProductServiceImplTest {
             User seller = User.builder().role(Role.SELLER).build();
 
             ProductRegistrationRequest.OptionRequest option =
-                    new ProductRegistrationRequest.OptionRequest(250, 100);
+                    new ProductRegistrationRequest.OptionRequest(250, 150000, 100);
 
             ProductRegistrationRequest request = new ProductRegistrationRequest(
                     "테스트 신발",
                     "테스트 신발입니다.",
-                    150000,
                     "Black",
                     "#000000",
                     "http://testimage.url",
@@ -59,7 +58,7 @@ public class ProductServiceImplTest {
                 securityUtils.when(SecurityUtils::getCurrentUser).thenReturn(seller);
 
                 // when
-                productService.registerProduct(request);
+                productService.register(request);
 
                 List<Product> products = productRepository.findAll();
 
@@ -77,12 +76,11 @@ public class ProductServiceImplTest {
             User user = User.builder().role(Role.USER).build();
 
             ProductRegistrationRequest.OptionRequest option =
-                    new ProductRegistrationRequest.OptionRequest(250, 100);
+                    new ProductRegistrationRequest.OptionRequest(250, 150000, 100);
 
             ProductRegistrationRequest request = new ProductRegistrationRequest(
                     "테스트 신발",
                     "테스트 신발입니다.",
-                    150000,
                     "Black",
                     "#000000",
                     "http://testimage.url",
@@ -94,10 +92,9 @@ public class ProductServiceImplTest {
                 securityUtils.when(SecurityUtils::getCurrentUser).thenReturn(user);
 
                 // when & then
-                assertThatThrownBy(() -> productService.registerProduct(request))
+                assertThatThrownBy(() -> productService.register(request))
                         .isInstanceOf(CustomException.class)
                         .hasMessage("판매자 권한이 필요합니다.");
-
             }
         }
     }

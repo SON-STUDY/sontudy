@@ -48,12 +48,11 @@ public class ProductControllerTest {
         void 유효한_요청이면_상품을_등록한다() throws Exception {
             // given
             ProductRegistrationRequest.OptionRequest option =
-                    new ProductRegistrationRequest.OptionRequest(250, 100);
+                    new ProductRegistrationRequest.OptionRequest(250, 150000, 100);
 
             ProductRegistrationRequest request = new ProductRegistrationRequest(
                     "테스트 신발",
                     "테스트 신발입니다.",
-                    150000,
                     "Black",
                     "#000000",
                     "http://testimage.url",
@@ -76,12 +75,11 @@ public class ProductControllerTest {
         void 상품_이름이_빈칸이면_예외가_발생한다() throws Exception {
             // given
             ProductRegistrationRequest.OptionRequest option =
-                    new ProductRegistrationRequest.OptionRequest(250, 100);
+                    new ProductRegistrationRequest.OptionRequest(250, 150000, 100);
 
             ProductRegistrationRequest request = new ProductRegistrationRequest(
                     null,
                     "테스트 신발입니다.",
-                    150000,
                     "Black",
                     "#000000",
                     "http://testimage.url",
@@ -105,12 +103,11 @@ public class ProductControllerTest {
         void 가격이_0원_미만이면_예외가_발생한다(int cost) throws Exception {
             // given
             ProductRegistrationRequest.OptionRequest option =
-                    new ProductRegistrationRequest.OptionRequest(250, 100);
+                    new ProductRegistrationRequest.OptionRequest(250, cost, 100);
 
             ProductRegistrationRequest request = new ProductRegistrationRequest(
                     "테스트 신발",
                     "테스트 신발입니다.",
-                    cost,
                     "Black",
                     "#000000",
                     "http://testimage.url",
@@ -126,19 +123,18 @@ public class ProductControllerTest {
             // then
             perform.andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("DC401_001"))
-                    .andExpect(jsonPath("$.message").value("가격은 0원 이상이어야 합니다."));
+                    .andExpect(jsonPath("$.message").value("가격에 음수를 입력할 수 없습니다."));
         }
 
         @Test
         void 드랍_시간이_빈칸이면_예외가_발생한다() throws Exception {
             // given
             ProductRegistrationRequest.OptionRequest option =
-                    new ProductRegistrationRequest.OptionRequest(250, 100);
+                    new ProductRegistrationRequest.OptionRequest(250, 150000, 100);
 
             ProductRegistrationRequest request = new ProductRegistrationRequest(
                     "테스트 신발",
                     "테스트 신발입니다.",
-                    15000,
                     "Black",
                     "#000000",
                     "http://testimage.url",
