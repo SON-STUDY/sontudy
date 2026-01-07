@@ -3,12 +3,18 @@ package org.son.sonstudy.domain.product.model;
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.son.sonstudy.domain.product.model.submodel.Color;
+import org.son.sonstudy.domain.product.model.submodel.ProductImage;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Getter
 @Table(name = "product")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product {
@@ -22,24 +28,12 @@ public class Product {
     @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
-    private int cost;
-
-    @Column(nullable = false)
-    private int size;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "color_id")
     private Color color;
 
-    @Column(nullable = false)
-    private String imageUrl;
-
-    @Column(nullable = false)
-    private int stock;
-
-    @Column(nullable = false)
-    private Long totalSales;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductImage> images = new ArrayList<>();
 
     @Column(nullable = false)
     private LocalDateTime releasedAt;
@@ -49,4 +43,40 @@ public class Product {
 
     @Enumerated(EnumType.STRING)
     private ProductStatus status;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductOption> options = new ArrayList<>();
+
+    @Builder
+    private Product(String name, String description, Color color,
+                    LocalDateTime releasedAt, ProductCategory category, ProductStatus status) {
+        this.name = name;
+        this.description = description;
+        this.color = color;
+        this.releasedAt = releasedAt;
+        this.category = category;
+        this.status = status;
+    }
+
+    public static Product createProduct(String name, String description, Color color,
+                                        LocalDateTime releasedAt, ProductCategory category) {
+        return Product.builder()
+                .name(name)
+                .description(description)
+                .color(color)
+                .releasedAt(releasedAt)
+                .category(category)
+                .status(ProductStatus.PREPARE)
+                .build();
+    }
+
+    public void addOption(ProductOption option) {
+        this.options.add(option);
+        option.setProduct(this);
+    }
+
+    public void addImage(ProductImage image) {
+        this.images.add(image);
+        image.setProduct(this);
+    }
 }
