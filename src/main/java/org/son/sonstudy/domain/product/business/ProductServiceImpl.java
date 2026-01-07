@@ -41,9 +41,6 @@ public class ProductServiceImpl implements ProductService {
         );
 
         for (var optionDto : request.options()) {
-            validateSize(optionDto.size());
-            validateCost(optionDto.cost());
-            validateStock(optionDto.stock());
             ProductOption option = ProductOption.builder()
                     .size(optionDto.size())
                     .cost(optionDto.cost())
@@ -74,24 +71,6 @@ public class ProductServiceImpl implements ProductService {
     private void validateSeller(User user) {
         if (user.getRole() != Role.SELLER) {
             throw new CustomException(ErrorCode.NOT_SELLER);
-        }
-    }
-
-    private void validateSize(int size) {
-        if (size < 100) {
-            throw new CustomException(ErrorCode.INVALID_PRODUCT_SIZE);
-        }
-    }
-
-    private void validateCost(int cost) {
-        if (cost < 0) {
-            throw new CustomException(ErrorCode.INVALID_PRODUCT_COST);
-        }
-    }
-
-    private void validateStock(int stock) {
-        if (stock < 0) {
-            throw new CustomException(ErrorCode.INVALID_STOCK);
         }
     }
 
