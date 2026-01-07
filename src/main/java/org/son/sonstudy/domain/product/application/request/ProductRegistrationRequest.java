@@ -24,10 +24,11 @@ public record ProductRegistrationRequest(
         @NotBlank(message = "색상 코드는 필수입니다.")
         String colorHexCode,
 
-        String imageUrl,
+        @NotEmpty(message = "최소 1장의 이미지를 등록해야 합니다.")
+        List<String> imageUrls,
 
         @NotNull(message = "드랍 시간은 필수입니다.")
-        LocalDateTime relasedAt,
+        LocalDateTime releasedAt,
 
         @NotNull(message = "카테고리는 필수입니다.")
         ProductCategory category,

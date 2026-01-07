@@ -1,6 +1,6 @@
 package org.son.sonstudy.domain.product.business;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.exception.CustomException;
@@ -10,6 +10,7 @@ import org.son.sonstudy.domain.product.model.Product;
 import org.son.sonstudy.domain.product.model.ProductOption;
 import org.son.sonstudy.domain.product.model.submodel.Color;
 import org.son.sonstudy.domain.product.model.submodel.ColorRepository;
+import org.son.sonstudy.domain.product.model.submodel.ProductImage;
 import org.son.sonstudy.domain.product.repository.ProductRepository;
 import org.son.sonstudy.domain.user.model.Role;
 import org.son.sonstudy.domain.user.model.User;
@@ -27,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
     public void register(ProductRegistrationRequest request) {
         User currentUser = SecurityUtils.getCurrentUser();
         validateSeller(currentUser);
+        validateImageSize(request.imageUrls().size());
 
         Color color = createOrGetColor(request.colorName(), request.colorHexCode());
 
@@ -34,8 +36,7 @@ public class ProductServiceImpl implements ProductService {
                 request.name(),
                 request.description(),
                 color,
-                "https://example.com",
-                request.relasedAt(),
+                request.releasedAt(),
                 request.category()
         );
 
@@ -52,7 +53,22 @@ public class ProductServiceImpl implements ProductService {
             product.addOption(option);
         }
 
+        for (int i = 0; i < request.imageUrls().size(); i++) {
+            ProductImage image = ProductImage.builder()
+                    .imageUrl(request.imageUrls().get(i))
+                    .orders(i)
+                    .build();
+
+            product.addImage(image);
+        }
+
         productRepository.save(product);
+    }
+
+    private void validateImageSize(int size) {
+        if (size < 1  || size > 10) {
+            throw new CustomException(ErrorCode.INVALID_IMAGE_SIZE);
+        }
     }
 
     private void validateSeller(User user) {

@@ -31,8 +31,7 @@ public class ProductOption {
     private Long totalSales;
 
     @Builder
-    public ProductOption(String id, int size, int cost, int stock) {
-        this.id = id;
+    public ProductOption(int size, int cost, int stock) {
         this.size = size;
         this.cost = cost;
         this.stock = stock;
