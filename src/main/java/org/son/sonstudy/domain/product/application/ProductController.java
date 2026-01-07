@@ -19,7 +19,7 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping("/registration")
+    @PostMapping()
     public ResponseEntity<ApiResponse<Void>> register(@RequestBody @Valid ProductRegistrationRequest request) {
         productService.register(request);
 
