@@ -11,6 +11,7 @@ import org.son.sonstudy.domain.product.application.ProductController;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
 import org.son.sonstudy.domain.product.business.ProductService;
 import org.son.sonstudy.domain.product.model.ProductCategory;
+import org.son.sonstudy.domain.product.model.submodel.ProductImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -55,13 +56,13 @@ public class ProductControllerTest {
                     "테스트 신발입니다.",
                     "Black",
                     "#000000",
-                    "http://testimage.url",
+                    List.of("testimage.url"),
                     LocalDateTime.now(),
                     ProductCategory.SNEAKERS,
                     List.of(option));
 
             // when
-            ResultActions perform = mockMvc.perform(post("/api/products/registration")
+            ResultActions perform = mockMvc.perform(post("/api/products")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)));
 
@@ -82,13 +83,13 @@ public class ProductControllerTest {
                     "테스트 신발입니다.",
                     "Black",
                     "#000000",
-                    "http://testimage.url",
+                    List.of("testimage.url"),
                     LocalDateTime.now(),
                     ProductCategory.SNEAKERS,
                     List.of(option));
 
             // when
-            ResultActions perform = mockMvc.perform(post("/api/products/registration")
+            ResultActions perform = mockMvc.perform(post("/api/products")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)));
 
@@ -110,13 +111,13 @@ public class ProductControllerTest {
                     "테스트 신발입니다.",
                     "Black",
                     "#000000",
-                    "http://testimage.url",
+                    List.of("testimage.url"),
                     LocalDateTime.now(),
                     ProductCategory.SNEAKERS,
                     List.of(option));
 
             // when
-            ResultActions perform = mockMvc.perform(post("/api/products/registration")
+            ResultActions perform = mockMvc.perform(post("/api/products")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)));
 
@@ -137,13 +138,13 @@ public class ProductControllerTest {
                     "테스트 신발입니다.",
                     "Black",
                     "#000000",
-                    "http://testimage.url",
+                    List.of("testimage.url"),
                     null,
                     ProductCategory.SNEAKERS,
                     List.of(option));
 
             // when
-            ResultActions perform = mockMvc.perform(post("/api/products/registration")
+            ResultActions perform = mockMvc.perform(post("/api/products")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)));
 

@@ -49,7 +49,7 @@ public class ProductServiceImplTest {
                     "테스트 신발입니다.",
                     "Black",
                     "#000000",
-                    "http://testimage.url",
+                    List.of("testimage.url"),
                     LocalDateTime.now(),
                     ProductCategory.SNEAKERS,
                     List.of(option));
@@ -83,7 +83,7 @@ public class ProductServiceImplTest {
                     "테스트 신발입니다.",
                     "Black",
                     "#000000",
-                    "http://testimage.url",
+                    List.of("testimage.url"),
                     LocalDateTime.now(),
                     ProductCategory.SNEAKERS,
                     List.of(option));
