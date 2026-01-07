@@ -1,6 +1,6 @@
-package org.son.sonstudy.common.jwt;
+package org.son.sonstudy.common.jwt.component;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.config.data.JwtProperties;
 import org.son.sonstudy.domain.user.model.User;
@@ -18,8 +18,14 @@ public class JwtProvider {
     public String generateAccessToken(User user) {
         return generateToken(user, jwtProperties.accessTokenExpireIn());
     }
-    
-    // TO DO: 리프레쉬 토큰도 만들어야 할까요
+
+    public String generateRefreshToken(User user) {
+        return generateToken(user, jwtProperties.refreshTokenExpireIn());
+    }
+
+    public String generateSuperToken(User user) {
+        return  generateToken(user, jwtProperties.superTokenExpireIn());
+    }
 
     private String generateToken(User user, long expiration) {
         long expiredAt = System.currentTimeMillis() + expiration;
@@ -27,6 +33,8 @@ public class JwtProvider {
         return Jwts.builder()
                 .issuer(jwtProperties.issuer())
                 .subject(user.getId())
+                .claim("email", user.getEmail())
+                .claim("role", user.getRole().name())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(expiredAt))
                 .signWith(secretKey, Jwts.SIG.HS512)

@@ -3,11 +3,12 @@ package org.son.sonstudy.domain.auth.business;
 import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.exception.CustomException;
+import org.son.sonstudy.common.jwt.component.JwtProvider;
+import org.son.sonstudy.common.jwt.data.TokenInfo;
 import org.son.sonstudy.domain.auth.model.CustomUserDetail;
 import org.son.sonstudy.domain.user.model.Role;
 import org.son.sonstudy.domain.user.model.User;
 import org.son.sonstudy.domain.user.repository.UserRepository;
-import org.son.sonstudy.common.jwt.JwtProvider;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,7 +25,7 @@ public class LocalAuthServiceImpl implements AuthService {
     private final JwtProvider jwtProvider;
 
     @Override
-    public String login(String email, String rawPassword) {
+    public TokenInfo login(String email, String rawPassword) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, rawPassword)
@@ -33,7 +34,14 @@ public class LocalAuthServiceImpl implements AuthService {
         CustomUserDetail tryUser = (CustomUserDetail) authentication.getPrincipal();
         User authUser = tryUser.getUser();
 
-        return jwtProvider.generateAccessToken(authUser);
+        if(authUser.getRole().equals(Role.ADMIN)){
+            return TokenInfo.ofAdmin(jwtProvider.generateSuperToken(authUser));
+        }
+
+        String accessToken = jwtProvider.generateAccessToken(authUser);
+        String refreshToken = jwtProvider.generateRefreshToken(authUser);
+
+        return TokenInfo.of(accessToken, refreshToken);
     }
 
     @Override

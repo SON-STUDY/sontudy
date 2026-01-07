@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
     // COMMON
-    BAD_REQUEST("DC401_001",HttpStatus.BAD_REQUEST, "요청 실패"),
+    BAD_REQUEST("DC400_001", HttpStatus.BAD_REQUEST, "요청 실패"),
     NOT_FOUND("DC404_001", HttpStatus.NOT_FOUND, "데이터 없음"),
 
     // USER
@@ -16,6 +16,9 @@ public enum ErrorCode {
     // AUTH
     FORBIDDEN_ACCESS("DC403_201", HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     NOT_SELLER("DC403_202", HttpStatus.FORBIDDEN, "판매자 권한이 필요합니다."),
+    INVALID_TOKEN_FORMAT("DC400_201", HttpStatus.BAD_REQUEST, "유효하지 않은 JWT 토큰"),
+    UNAUTHORIZED_TOKEN("DC401_201", HttpStatus.UNAUTHORIZED, "JWT 토큰 인증 실패"),
+    EXPIRED_TOKEN("DC401_201", HttpStatus.UNAUTHORIZED, "만료된 JWT 토큰"),
 
     // PRODUCT
     // 예외 기준은 임의로 잡아놓았습니다. 추후 정합시다.

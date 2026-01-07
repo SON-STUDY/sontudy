@@ -1,8 +1,12 @@
 package org.son.sonstudy.domain.user.business;
 
 import lombok.RequiredArgsConstructor;
+import org.son.sonstudy.common.api.code.ErrorCode;
+import org.son.sonstudy.common.exception.CustomException;
+import org.son.sonstudy.common.jwt.data.TokenInfo;
 import org.son.sonstudy.domain.auth.business.AuthService;
 import org.son.sonstudy.domain.user.business.response.SignUpResponse;
+import org.son.sonstudy.domain.user.business.response.UserInfoResponse;
 import org.son.sonstudy.domain.user.model.Role;
 import org.son.sonstudy.domain.user.model.User;
 import org.son.sonstudy.domain.user.repository.UserRepository;
@@ -25,8 +29,16 @@ public class UserService {
 
     @Transactional
     public SignUpResponse login(String email, String rawPassword) {
-        String accessToken = authService.login(email, rawPassword);
+        TokenInfo tokenInfo = authService.login(email, rawPassword);
 
-        return new SignUpResponse(accessToken);
+        return SignUpResponse.from(tokenInfo);
+    }
+
+    @Transactional
+    public UserInfoResponse getUserInfo(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return UserInfoResponse.of(user);
     }
 }
