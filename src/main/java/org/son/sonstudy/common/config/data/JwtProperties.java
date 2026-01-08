@@ -8,6 +8,7 @@ public record JwtProperties(
         String issuer,
         long accessTokenExpireIn,
         long refreshTokenExpireIn,
+        boolean superTokenEnabled,
         long superTokenExpireIn
 ) {
 }

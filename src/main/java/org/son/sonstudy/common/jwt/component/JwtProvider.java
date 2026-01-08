@@ -2,7 +2,9 @@ package org.son.sonstudy.common.jwt.component;
 
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
+import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.config.data.JwtProperties;
+import org.son.sonstudy.common.exception.CustomException;
 import org.son.sonstudy.domain.user.model.User;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +26,11 @@ public class JwtProvider {
     }
 
     public String generateSuperToken(User user) {
-        return  generateToken(user, jwtProperties.superTokenExpireIn());
+        if(jwtProperties.superTokenEnabled()){
+            return  generateToken(user, jwtProperties.superTokenExpireIn());
+        }
+
+        throw new CustomException(ErrorCode.SUPER_TOKEN_ACCESS_DENIED);
     }
 
     private String generateToken(User user, long expiration) {
