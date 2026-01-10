@@ -10,8 +10,16 @@ public enum SuccessCode {
     CREATED("DC201_002", HttpStatus.CREATED, "생성 성공"),
 
     // USER
-    LOGIN("DC201_101", HttpStatus.OK, "로그인 성공"),
-    SIGN_UP("DC201_102", HttpStatus.CREATED, "회원가입 성공");
+    LOGIN("DC200_101", HttpStatus.OK, "로그인 성공"),
+    SELLER_APPLICATION_OK("DC200_102", HttpStatus.OK, "판매자 신청 성공"),
+    SIGN_UP("DC201_101", HttpStatus.CREATED, "회원가입 성공"),
+    SELLER_SUBMITTED("DC201_102", HttpStatus.CREATED, "판매자 등록 성공"),
+
+    // PRODUCT
+    PRODUCT_OK("DC200_401", HttpStatus.OK, "상품 조회 성공"),
+    PRODUCT_REGISTERED("DC201_401", HttpStatus.CREATED, "상품 등록 성공");
+
+
 
     private final String code;
     private final HttpStatus httpStatus;

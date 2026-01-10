@@ -38,4 +38,12 @@ public class User {
         this.password = password;
         this.role = role;
     }
+
+    public void approveSeller() {
+        this.role = Role.SELLER;
+    }
+
+    public void rejectSeller() {
+        this.role = Role.USER;
+    }
 }
