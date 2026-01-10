@@ -46,7 +46,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<SignUpResponse>> login(
-            @RequestBody LoginRequest loginRequest
+            @Valid @RequestBody LoginRequest loginRequest
     ) {
         SignUpResponse result = userService.login(
                 loginRequest.email(),
@@ -54,5 +54,14 @@ public class UserController {
         );
 
         return ApiResponse.success(SuccessCode.LOGIN, result);
+    }
+
+    @PostMapping("/seller-application")
+    public ResponseEntity<ApiResponse<Void>> applyForSeller(
+            @AuthenticationPrincipal UserContext userContext
+            // TO DO: 신청에 필요한 데이터는 추후 개발
+    ) {
+        userService.applyForSeller(userContext.userId());
+        return ApiResponse.success(SuccessCode.OK);
     }
 }
