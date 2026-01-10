@@ -11,6 +11,7 @@ public enum SuccessCode {
 
     // USER
     LOGIN("DC200_101", HttpStatus.OK, "로그인 성공"),
+    SELLER_APPLICATION_OK("DC200_102", HttpStatus.OK, "판매자 신청 성공"),
     SIGN_UP("DC201_101", HttpStatus.CREATED, "회원가입 성공"),
     SELLER_SUBMITTED("DC201_102", HttpStatus.CREATED, "판매자 등록 성공"),
 

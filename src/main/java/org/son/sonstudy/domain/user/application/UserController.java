@@ -62,6 +62,6 @@ public class UserController {
             // TO DO: 신청에 필요한 데이터는 추후 개발
     ) {
         userService.applyForSeller(userContext.userId());
-        return ApiResponse.success(SuccessCode.OK);
+        return ApiResponse.success(SuccessCode.SELLER_APPLICATION_OK);
     }
 }

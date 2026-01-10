@@ -27,7 +27,7 @@ public class ProductController {
     public ResponseEntity<ApiResponse<Void>> register(@RequestBody @Valid ProductRegistrationRequest request) {
         productService.register(request);
 
-        return ApiResponse.success(SuccessCode.OK);
+        return ApiResponse.success(SuccessCode.PRODUCT_REGISTERED);
     }
 
     @GetMapping

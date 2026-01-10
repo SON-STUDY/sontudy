@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     // COMMON
     BAD_REQUEST("DC400_001", HttpStatus.BAD_REQUEST, "요청 실패"),
-    INVALID_JSON_FORMAT("DC400_002", HttpStatus.BAD_REQUEST, "잘못된 JSON 형식."),
+    INVALID_JSON_FORMAT("DC400_002", HttpStatus.BAD_REQUEST, "잘못된 JSON 형식 요청."),
     PARAMETER_TYPE_MISMATCH("DC400_003", HttpStatus.BAD_REQUEST, "파라미터 불일치"),
     NOT_FOUND("DC404_001", HttpStatus.NOT_FOUND, "데이터 없음"),
     ENDPOINT_NOT_FOUND("DC404_002", HttpStatus.NOT_FOUND, "존재하지 않는 엔드포인트"),
