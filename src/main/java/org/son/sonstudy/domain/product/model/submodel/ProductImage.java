@@ -2,13 +2,11 @@ package org.son.sonstudy.domain.product.model.submodel;
 
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.son.sonstudy.domain.product.model.Product;
 
 @Entity
+@Getter
 @Table(name = "product_image")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductImage {

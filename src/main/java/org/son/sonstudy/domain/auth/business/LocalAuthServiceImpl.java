@@ -34,10 +34,6 @@ public class LocalAuthServiceImpl implements AuthService {
         CustomUserDetail tryUser = (CustomUserDetail) authentication.getPrincipal();
         User authUser = tryUser.getUser();
 
-        if(authUser.getRole().equals(Role.ADMIN)){
-            return TokenInfo.ofAdmin(jwtProvider.generateSuperToken(authUser));
-        }
-
         String accessToken = jwtProvider.generateAccessToken(authUser);
         String refreshToken = jwtProvider.generateRefreshToken(authUser);
 

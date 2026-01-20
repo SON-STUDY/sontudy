@@ -7,7 +7,6 @@ public record JwtProperties(
         String secret,
         String issuer,
         long accessTokenExpireIn,
-        long refreshTokenExpireIn,
-        long superTokenExpireIn
+        long refreshTokenExpireIn
 ) {
 }
