@@ -36,5 +36,6 @@ public class SellerApplication {
 
     public void updateStatus(ApplicationStatus status) {
         this.status = status;
+        this.user.approveSeller();
     }
 }
