@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.exception.CustomException;
 import org.son.sonstudy.common.jwt.data.TokenInfo;
-import org.son.sonstudy.domain.auth.business.AuthService;
+import org.son.sonstudy.domain.auth.business.LocalAuthService;
 import org.son.sonstudy.domain.user.business.response.SellerApplicationResponse;
 import org.son.sonstudy.domain.user.business.response.SignUpResponse;
 import org.son.sonstudy.domain.user.business.response.UserInfoResponse;
@@ -25,18 +25,18 @@ public class UserService {
     private final UserRepository userRepository;
     private final SellerApplicationRepository sellerApplicationRepository;
 
-    private final AuthService authService;
+    private final LocalAuthService localAuthService;
 
     @Transactional
     public void signUp(String name, String email, String rawPassword, Role role) {
 
-        User savedUser = authService.signUp(name, email, rawPassword, role);
+        User savedUser = localAuthService.signUp(name, email, rawPassword, role);
         userRepository.save(savedUser);
     }
 
     @Transactional
     public SignUpResponse login(String email, String rawPassword) {
-        TokenInfo tokenInfo = authService.login(email, rawPassword);
+        TokenInfo tokenInfo = localAuthService.login(email, rawPassword);
 
         return SignUpResponse.from(tokenInfo);
     }
@@ -86,5 +86,6 @@ public class UserService {
         }
 
         application.updateStatus(status);
+
     }
 }
