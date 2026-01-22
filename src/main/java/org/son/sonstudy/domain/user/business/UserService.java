@@ -58,6 +58,10 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        if (!user.getRole().equals(Role.USER)) {
+            throw new CustomException(ErrorCode.ALREADY_SELLER_AUTHORIZED);
+        }
+
         SellerApplication application = SellerApplication.builder()
                 .user(user)
                 .build();
@@ -73,20 +77,14 @@ public class UserService {
     }
 
     @Transactional
-    public void approveSellerApplication(String applicationId) {
+    public void updateSellerApplicationStatus(String applicationId, ApplicationStatus status) {
         SellerApplication application = sellerApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_NOT_FOUND));
 
-        application.approve();
-        application.getUser().approveSeller();
-    }
+        if (!application.getStatus().equals(ApplicationStatus.PENDING)) {
+            return;
+        }
 
-    @Transactional
-    public void rejectSellerApplication(String applicationId) {
-        SellerApplication application = sellerApplicationRepository.findById(applicationId)
-                .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_NOT_FOUND));
-
-        application.reject();
-        application.getUser().rejectSeller();
+        application.updateStatus(status);
     }
 }

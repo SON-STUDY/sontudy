@@ -39,19 +39,12 @@ public class AdminController {
         return ApiResponse.success(SuccessCode.OK, userService.getPendingApplications());
     }
 
-    @PostMapping("/seller-applications/{applicationId}/approve")
+    @PatchMapping("/seller-applications/{applicationId}/status")
     public ResponseEntity<ApiResponse<Void>> approveSellerApplication(
-            @PathVariable String applicationId
+            @PathVariable String applicationId,
+            @RequestBody ReviewRequest request
     ) {
-        userService.approveSellerApplication(applicationId);
-        return ApiResponse.success(SuccessCode.OK);
-    }
-
-    @PostMapping("/seller-applications/{applicationId}/reject")
-    public ResponseEntity<ApiResponse<Void>> rejectSellerApplication(
-            @PathVariable String applicationId
-    ) {
-        userService.rejectSellerApplication(applicationId);
+        userService.updateSellerApplicationStatus(applicationId, request.status());
         return ApiResponse.success(SuccessCode.OK);
     }
 }
