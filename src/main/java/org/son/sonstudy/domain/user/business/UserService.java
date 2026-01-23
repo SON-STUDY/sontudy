@@ -86,6 +86,6 @@ public class UserService {
         }
 
         application.updateStatus(status);
-
+        application.getUser().approveSeller();
     }
 }
