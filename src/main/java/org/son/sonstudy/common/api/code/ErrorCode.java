@@ -37,7 +37,7 @@ public enum ErrorCode {
     INVALID_PRODUCT_COST("DC400_301", HttpStatus.BAD_REQUEST, "상품 가격은 0원 이상이어야 합니다."),
     INVALID_PRODUCT_SIZE("DC400_302", HttpStatus.BAD_REQUEST, "유효하지 않은 상품 사이즈입니다."),
     INVALID_STOCK("DC400_303", HttpStatus.BAD_REQUEST, "재고량은 음수가 될 수 없습니다."),
-    INVALID_IMAGE_SIZE("DC400_301", HttpStatus.BAD_REQUEST, "상품 이미지는 1-10장 사이여야 합니다.");
+    INVALID_IMAGE_SIZE("DC400_304", HttpStatus.BAD_REQUEST, "상품 이미지는 1-10장 사이여야 합니다.");
 
     private final String code;
     private final HttpStatus httpStatus;
