@@ -21,6 +21,7 @@ public enum ErrorCode {
     APPLICATION_NOT_FOUND("DC404_102", HttpStatus.NOT_FOUND, "신청서를 찾을 수 없습니다."),
     EMAIL_DUPLICATE("DC409_101", HttpStatus.CONFLICT, "이미 존재하는 이메일"),
     ALREADY_APPLIED("DC409_102", HttpStatus.CONFLICT, "이미 신청된 상태입니다."),
+    ALREADY_SELLER_AUTHORIZED("DC409_103", HttpStatus.CONFLICT, "이미 판매 권한이 있는 사용자입니다."),
 
     // AUTH
     INVALID_TOKEN_FORMAT("DC400_201", HttpStatus.BAD_REQUEST, "유효하지 않은 JWT 토큰"),
@@ -36,7 +37,7 @@ public enum ErrorCode {
     INVALID_PRODUCT_COST("DC400_301", HttpStatus.BAD_REQUEST, "상품 가격은 0원 이상이어야 합니다."),
     INVALID_PRODUCT_SIZE("DC400_302", HttpStatus.BAD_REQUEST, "유효하지 않은 상품 사이즈입니다."),
     INVALID_STOCK("DC400_303", HttpStatus.BAD_REQUEST, "재고량은 음수가 될 수 없습니다."),
-    INVALID_IMAGE_SIZE("DC400_301", HttpStatus.BAD_REQUEST, "상품 이미지는 1-10장 사이여야 합니다.");
+    INVALID_IMAGE_SIZE("DC400_304", HttpStatus.BAD_REQUEST, "상품 이미지는 1-10장 사이여야 합니다.");
 
     private final String code;
     private final HttpStatus httpStatus;

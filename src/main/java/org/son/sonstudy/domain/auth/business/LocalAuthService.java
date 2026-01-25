@@ -17,14 +17,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class LocalAuthServiceImpl implements AuthService {
+public class LocalAuthService {
     private final AuthenticationManager authenticationManager;
     private final BCryptPasswordEncoder passwordEncoder;
 
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
 
-    @Override
     public TokenInfo login(String email, String rawPassword) {
 
         Authentication authentication = authenticationManager.authenticate(
@@ -40,7 +39,6 @@ public class LocalAuthServiceImpl implements AuthService {
         return TokenInfo.of(accessToken, refreshToken);
     }
 
-    @Override
     public User signUp(String name, String email, String rawPassword, Role role) {
         String encodedPassword = createPassword(rawPassword);
 
