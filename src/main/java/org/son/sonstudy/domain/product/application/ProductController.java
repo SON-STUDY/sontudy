@@ -8,6 +8,7 @@ import org.son.sonstudy.domain.product.application.request.ProductRegistrationRe
 import org.son.sonstudy.domain.product.business.ProductService;
 import org.son.sonstudy.domain.product.business.response.ProductDetailResponse;
 import org.son.sonstudy.domain.product.business.response.ProductResponse;
+import org.son.sonstudy.domain.product.business.response.ScheduledDropsResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -45,6 +46,14 @@ public class ProductController {
     ) {
         ProductDetailResponse response = productService.findProductDetail(productId);
 
+        return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
+    }
+
+    @GetMapping(params = "dropStatus=scheduled")
+    public ResponseEntity<ApiResponse<ScheduledDropsResponse>> getScheduledDrops(
+            @PageableDefault(size = 5, sort = "releasedAt", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        ScheduledDropsResponse response = productService.findScheduledDrops(pageable);
         return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
     }
 }

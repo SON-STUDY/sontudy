@@ -6,6 +6,7 @@ import org.son.sonstudy.common.exception.CustomException;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
 import org.son.sonstudy.domain.product.business.response.ProductDetailResponse;
 import org.son.sonstudy.domain.product.business.response.ProductResponse;
+import org.son.sonstudy.domain.product.business.response.ScheduledDropsResponse;
 import org.son.sonstudy.domain.product.model.Product;
 import org.son.sonstudy.domain.product.model.ProductOption;
 import org.son.sonstudy.domain.product.model.submodel.Color;
@@ -76,6 +77,11 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
         return ProductDetailResponse.from(product);
+    }
+
+    @Override
+    public ScheduledDropsResponse findScheduledDrops(Pageable pageable) {
+        return null;
     }
 
     private void validateImageSize(int size) {
