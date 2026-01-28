@@ -1,6 +1,7 @@
 package org.son.sonstudy.domain.product.business;
 
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
+import org.son.sonstudy.domain.product.application.request.ScheduledDropsRequest;
 import org.son.sonstudy.domain.product.business.response.ProductDetailResponse;
 import org.son.sonstudy.domain.product.business.response.ProductResponse;
 import org.son.sonstudy.domain.product.business.response.ScheduledDropsResponse;
@@ -14,5 +15,5 @@ public interface ProductService {
 
     ProductDetailResponse findProductDetail(String productId);
 
-    ScheduledDropsResponse findScheduledDrops(Pageable pageable);
+    ScheduledDropsResponse findScheduledDrops(ScheduledDropsRequest request);
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.exception.CustomException;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
+import org.son.sonstudy.domain.product.application.request.ScheduledDropsRequest;
 import org.son.sonstudy.domain.product.business.response.ProductDetailResponse;
 import org.son.sonstudy.domain.product.business.response.ProductResponse;
 import org.son.sonstudy.domain.product.business.response.ScheduledDropsResponse;
@@ -81,7 +82,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ScheduledDropsResponse findScheduledDrops(Pageable pageable) {
+    public ScheduledDropsResponse findScheduledDrops(ScheduledDropsRequest request) {
 
         return null;
     }

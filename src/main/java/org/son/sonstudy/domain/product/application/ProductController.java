@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.SuccessCode;
 import org.son.sonstudy.common.api.response.ApiResponse;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
+import org.son.sonstudy.domain.product.application.request.ScheduledDropsRequest;
 import org.son.sonstudy.domain.product.business.ProductService;
 import org.son.sonstudy.domain.product.business.response.ProductDetailResponse;
 import org.son.sonstudy.domain.product.business.response.ProductResponse;
@@ -51,9 +52,10 @@ public class ProductController {
 
     @GetMapping(params = "dropStatus=scheduled")
     public ResponseEntity<ApiResponse<ScheduledDropsResponse>> getScheduledDrops(
-            @PageableDefault(size = 5, sort = "releasedAt", direction = Sort.Direction.ASC) Pageable pageable
+            @ModelAttribute ScheduledDropsRequest request
     ) {
-        ScheduledDropsResponse response = productService.findScheduledDrops(pageable);
+        ScheduledDropsRequest normalized = request.normalize(5);
+        ScheduledDropsResponse response = productService.findScheduledDrops(normalized);
         return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
     }
 }
