@@ -35,6 +35,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = Product.createProduct(
                 request.name(),
                 request.description(),
+                request.brand(),
                 color,
                 request.releasedAt(),
                 request.category()
@@ -81,6 +82,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ScheduledDropsResponse findScheduledDrops(Pageable pageable) {
+
         return null;
     }
 
