@@ -1,17 +1,18 @@
 package org.son.sonstudy.domain.product.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.son.sonstudy.common.config.SecurityConfig;
+import org.son.sonstudy.common.jwt.filter.JwtAuthenticationFilter;
 import org.son.sonstudy.domain.product.application.ProductController;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
+import org.son.sonstudy.domain.product.application.request.ScheduledDropsRequest;
 import org.son.sonstudy.domain.product.business.ProductService;
+import org.son.sonstudy.domain.product.business.response.ScheduledDropsResponse;
 import org.son.sonstudy.domain.product.model.ProductCategory;
-import org.son.sonstudy.domain.product.model.submodel.ProductImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,14 +27,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ProductController.class,
         excludeFilters = {
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)})
-@AutoConfigureMockMvc(addFilters = false) // 스프링 시큐리티 필터 비활성화
+                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class),
+                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthenticationFilter.class)})
+@AutoConfigureMockMvc(addFilters = false)
 public class ProductControllerTest {
 
     @Autowired private MockMvc mockMvc;
@@ -54,6 +58,7 @@ public class ProductControllerTest {
             ProductRegistrationRequest request = new ProductRegistrationRequest(
                     "테스트 신발",
                     "테스트 신발입니다.",
+                    "NIKE",
                     "Black",
                     "#000000",
                     List.of("testimage.url"),
@@ -67,8 +72,8 @@ public class ProductControllerTest {
                     .content(objectMapper.writeValueAsString(request)));
 
             // then
-            perform.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.code").exists())
+            perform.andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.code").value("DC201_401"))
                     .andExpect(jsonPath("$.message").exists());
         }
 
@@ -81,6 +86,7 @@ public class ProductControllerTest {
             ProductRegistrationRequest request = new ProductRegistrationRequest(
                     null,
                     "테스트 신발입니다.",
+                    "NIKE",
                     "Black",
                     "#000000",
                     List.of("testimage.url"),
@@ -95,7 +101,7 @@ public class ProductControllerTest {
 
             // then
             perform.andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.code").value("DC401_001"))
+                    .andExpect(jsonPath("$.code").value("DC400_001"))
                     .andExpect(jsonPath("$.message").value("상품명은 필수입니다."));
         }
 
@@ -109,6 +115,7 @@ public class ProductControllerTest {
             ProductRegistrationRequest request = new ProductRegistrationRequest(
                     "테스트 신발",
                     "테스트 신발입니다.",
+                    "NIKE",
                     "Black",
                     "#000000",
                     List.of("testimage.url"),
@@ -123,7 +130,7 @@ public class ProductControllerTest {
 
             // then
             perform.andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.code").value("DC401_001"))
+                    .andExpect(jsonPath("$.code").value("DC400_001"))
                     .andExpect(jsonPath("$.message").value("가격에 음수를 입력할 수 없습니다."));
         }
 
@@ -136,6 +143,7 @@ public class ProductControllerTest {
             ProductRegistrationRequest request = new ProductRegistrationRequest(
                     "테스트 신발",
                     "테스트 신발입니다.",
+                    "NIKE",
                     "Black",
                     "#000000",
                     List.of("testimage.url"),
@@ -150,8 +158,65 @@ public class ProductControllerTest {
 
             // then
             perform.andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.code").value("DC401_001"))
+                    .andExpect(jsonPath("$.code").value("DC400_001"))
                     .andExpect(jsonPath("$.message").value("드랍 시간은 필수입니다."));
+        }
+    }
+
+    @Nested
+    class 예정된_드랍_상품을_조회할_때 {
+
+        @Test
+        void 정상_요청이면_예정된_드랍_목록을_응답한다() throws Exception {
+            // given
+            LocalDateTime releasedAt = LocalDateTime.of(2026, 2, 1, 10, 0);
+            ScheduledDropsResponse.ScheduledDropElement element =
+                    new ScheduledDropsResponse.ScheduledDropElement(
+                            "product-1",
+                            "https://cdn.example.com/products/1/main.jpg",
+                            releasedAt,
+                            "NIKE",
+                            "Air Max 1",
+                            179000,
+                            42,
+                            true,
+                            false
+                    );
+            ScheduledDropsResponse response = new ScheduledDropsResponse(
+                    List.of(element),
+                    "product-1",
+                    releasedAt,
+                    false
+            );
+            given(productService.findScheduledDrops(any(ScheduledDropsRequest.class))).willReturn(response);
+
+            // when
+            ResultActions perform = mockMvc.perform(get("/api/products")
+                    .param("dropStatus", "scheduled")
+                    .param("size", "5"));
+
+            // then
+            perform.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.code").exists())
+                    .andExpect(jsonPath("$.message").exists())
+                    .andExpect(jsonPath("$.data.content[0].id").value("product-1"))
+                    .andExpect(jsonPath("$.data.content[0].brand").value("NIKE"))
+                    .andExpect(jsonPath("$.data.content[0].name").value("Air Max 1"))
+                    .andExpect(jsonPath("$.data.nextCursorId").value("product-1"));
+        }
+
+        @Test
+        void 커서_날짜_형식이_잘못되면_예외를_응답한다() throws Exception {
+            // when
+            ResultActions perform = mockMvc.perform(get("/api/products")
+                    .param("dropStatus", "scheduled")
+                    .param("cursorReleasedAt", "not-a-date")
+                    .param("size", "5"));
+
+            // then
+            perform.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("DC400_001"))
+                    .andExpect(jsonPath("$.message").exists());
         }
     }
 
