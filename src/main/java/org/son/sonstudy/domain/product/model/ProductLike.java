@@ -51,7 +51,6 @@ public class ProductLike {
     public static ProductLike create(User user, Product product) {
         ProductLike like = new ProductLike(user, product);
         user.addLike(like);
-        product.addLike(like);
         return like;
     }
 }

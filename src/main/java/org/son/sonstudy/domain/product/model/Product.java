@@ -50,9 +50,6 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductOption> options = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductLike> likes = new ArrayList<>();
-
     @Builder
     private Product(String name, String description, String brand, Color color,
                     LocalDateTime releasedAt, ProductCategory category, ProductStatus status) {
@@ -86,15 +83,5 @@ public class Product {
     public void addImage(ProductImage image) {
         this.images.add(image);
         image.setProduct(this);
-    }
-
-    public void addLike(ProductLike like) {
-        if (!this.likes.contains(like)) {
-            this.likes.add(like);
-        }
-    }
-
-    public void removeLike(ProductLike like) {
-        this.likes.remove(like);
     }
 }
