@@ -218,6 +218,19 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.code").value("DC400_001"))
                     .andExpect(jsonPath("$.message").exists());
         }
+
+        @Test
+        void dropStatus가_잘못되면_예외를_응답한다() throws Exception {
+            // when
+            ResultActions perform = mockMvc.perform(get("/api/products")
+                    .param("dropStatus", "invalid-status")
+                    .param("size", "5"));
+
+            // then
+            perform.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("DC400_003"))
+                    .andExpect(jsonPath("$.message").exists());
+        }
     }
 
 }

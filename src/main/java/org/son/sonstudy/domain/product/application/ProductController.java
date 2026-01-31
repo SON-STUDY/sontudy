@@ -4,12 +4,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.SuccessCode;
 import org.son.sonstudy.common.api.response.ApiResponse;
+import org.son.sonstudy.domain.product.application.request.DropStatus;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
 import org.son.sonstudy.domain.product.application.request.ScheduledDropsRequest;
 import org.son.sonstudy.domain.product.business.ProductService;
 import org.son.sonstudy.domain.product.business.response.ProductDetailResponse;
 import org.son.sonstudy.domain.product.business.response.ProductResponse;
 import org.son.sonstudy.domain.product.business.response.ScheduledDropsResponse;
+import org.son.sonstudy.common.api.code.ErrorCode;
+import org.son.sonstudy.common.exception.CustomException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -50,10 +53,16 @@ public class ProductController {
         return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
     }
 
-    @GetMapping(params = "dropStatus=scheduled")
-    public ResponseEntity<ApiResponse<ScheduledDropsResponse>> getScheduledDrops(
+    @GetMapping(params = "dropStatus")
+    public ResponseEntity<ApiResponse<ScheduledDropsResponse>> getDropsByStatus(
+            @RequestParam String dropStatus,
             @ModelAttribute ScheduledDropsRequest request
     ) {
+        DropStatus status = DropStatus.from(dropStatus);
+        if (status != DropStatus.SCHEDULED) {
+            throw new CustomException(ErrorCode.BAD_REQUEST);
+        } // 다른 dropStatus 확장 시 분기 추가 하면 됨
+
         ScheduledDropsRequest normalized = request.normalize(5);
         ScheduledDropsResponse response = productService.findScheduledDrops(normalized);
         return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
