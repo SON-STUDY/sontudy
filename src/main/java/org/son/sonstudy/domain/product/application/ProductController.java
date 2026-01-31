@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.SuccessCode;
 import org.son.sonstudy.common.api.response.ApiResponse;
+import org.son.sonstudy.common.jwt.data.UserContext;
 import org.son.sonstudy.domain.product.application.request.DropStatus;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
 import org.son.sonstudy.domain.product.application.request.ScheduledDropsRequest;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,8 +31,11 @@ public class ProductController {
 
     @PostMapping()
     @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
-    public ResponseEntity<ApiResponse<Void>> register(@RequestBody @Valid ProductRegistrationRequest request) {
-        productService.register(request);
+    public ResponseEntity<ApiResponse<Void>> register(
+            @AuthenticationPrincipal UserContext userContext,
+            @RequestBody @Valid ProductRegistrationRequest request
+    ) {
+        productService.register(userContext.userId(), request);
 
         return ApiResponse.success(SuccessCode.PRODUCT_REGISTERED);
     }
@@ -55,6 +60,7 @@ public class ProductController {
 
     @GetMapping(params = "dropStatus")
     public ResponseEntity<ApiResponse<ScheduledDropsResponse>> getDropsByStatus(
+            @AuthenticationPrincipal(errorOnInvalidType = false) UserContext userContext,
             @RequestParam String dropStatus,
             @ModelAttribute ScheduledDropsRequest request
     ) {
@@ -63,8 +69,9 @@ public class ProductController {
             throw new CustomException(ErrorCode.BAD_REQUEST);
         } // 다른 dropStatus 확장 시 분기 추가 하면 됨
 
+        String userId = userContext != null ? userContext.userId() : null;
         ScheduledDropsRequest normalized = request.normalize(5);
-        ScheduledDropsResponse response = productService.findScheduledDrops(normalized);
+        ScheduledDropsResponse response = productService.findScheduledDrops(userId, normalized);
         return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
     }
 }

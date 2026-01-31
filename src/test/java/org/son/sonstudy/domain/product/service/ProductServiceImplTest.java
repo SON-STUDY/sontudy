@@ -2,9 +2,7 @@ package org.son.sonstudy.domain.product.service;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 import org.son.sonstudy.common.exception.CustomException;
-import org.son.sonstudy.common.util.SecurityUtils;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
 import org.son.sonstudy.domain.product.application.request.ScheduledDropsRequest;
 import org.son.sonstudy.domain.product.business.ProductService;
@@ -15,8 +13,6 @@ import org.son.sonstudy.domain.product.model.submodel.Color;
 import org.son.sonstudy.domain.product.model.submodel.ColorRepository;
 import org.son.sonstudy.domain.product.model.submodel.ProductImage;
 import org.son.sonstudy.domain.product.repository.ProductRepository;
-import org.son.sonstudy.domain.user.model.Role;
-import org.son.sonstudy.domain.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -27,7 +23,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mockStatic;
 
 @SpringBootTest
 @Transactional
@@ -45,7 +40,7 @@ public class ProductServiceImplTest {
         @Test
         void 유효한_요청이면_상품을_등록한다() {
             // given
-            User seller = User.builder().role(Role.SELLER).build();
+            String userId = "test-user-id";
 
             ProductRegistrationRequest.OptionRequest option =
                     new ProductRegistrationRequest.OptionRequest(250, 150000, 100);
@@ -61,49 +56,17 @@ public class ProductServiceImplTest {
                     ProductCategory.SNEAKERS,
                     List.of(option));
 
-            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
-                securityUtils.when(SecurityUtils::getCurrentUser).thenReturn(seller);
+            // when
+            productService.register(userId, request);
 
-                // when
-                productService.register(request);
+            List<Product> products = productRepository.findAll();
 
-                List<Product> products = productRepository.findAll();
+            // then
+            assertThat(products).hasSize(1);
+            assertThat(products.get(0).getName()).isEqualTo("테스트 신발");
+            assertThat(products.get(0).getOptions().get(0).getSize()).isEqualTo(250);
 
-                // then
-                assertThat(products).hasSize(1);
-                assertThat(products.get(0).getName()).isEqualTo("테스트 신발");
-                assertThat(products.get(0).getOptions().get(0).getSize()).isEqualTo(250);
-
-                assertThat(products.get(0).getColor().getColorName()).isEqualTo("Black");
-            }
-        }
-
-        @Test
-        void 유저_역할이_SELLER가_아닌_경우_예외가_발생한다() {
-            User user = User.builder().role(Role.USER).build();
-
-            ProductRegistrationRequest.OptionRequest option =
-                    new ProductRegistrationRequest.OptionRequest(250, 150000, 100);
-
-            ProductRegistrationRequest request = new ProductRegistrationRequest(
-                    "테스트 신발",
-                    "테스트 신발입니다.",
-                    "NIKE",
-                    "Black",
-                    "#000000",
-                    List.of("testimage.url"),
-                    LocalDateTime.now(),
-                    ProductCategory.SNEAKERS,
-                    List.of(option));
-
-            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
-                securityUtils.when(SecurityUtils::getCurrentUser).thenReturn(user);
-
-                // when & then
-                assertThatThrownBy(() -> productService.register(request))
-                        .isInstanceOf(CustomException.class)
-                        .hasMessage("판매자 권한이 필요합니다.");
-            }
+            assertThat(products.get(0).getColor().getColorName()).isEqualTo("Black");
         }
     }
 
@@ -120,15 +83,13 @@ public class ProductServiceImplTest {
 
             ScheduledDropsRequest request = new ScheduledDropsRequest(null, null, 2);
 
-            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
-                securityUtils.when(SecurityUtils::getCurrentUser).thenReturn(null);
+            // when
+            var response = productService.findScheduledDrops(null, request);
 
-                var response = productService.findScheduledDrops(request);
-
-                assertThat(response.content()).hasSize(2);
-                assertThat(response.hasNext()).isTrue();
-                assertThat(response.nextCursorId()).isEqualTo(response.content().get(1).id());
-            }
+            // then
+            assertThat(response.content()).hasSize(2);
+            assertThat(response.hasNext()).isTrue();
+            assertThat(response.nextCursorId()).isEqualTo(response.content().get(1).id());
         }
 
         @Test
@@ -139,21 +100,19 @@ public class ProductServiceImplTest {
 
             ScheduledDropsRequest request = new ScheduledDropsRequest(null, null, null);
 
-            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
-                securityUtils.when(SecurityUtils::getCurrentUser).thenReturn(null);
+            // when
+            var response = productService.findScheduledDrops(null, request);
 
-                var response = productService.findScheduledDrops(request);
-
-                assertThat(response.content()).hasSize(1);
-                assertThat(response.hasNext()).isFalse();
-            }
+            // then
+            assertThat(response.content()).hasSize(1);
+            assertThat(response.hasNext()).isFalse();
         }
 
         @Test
         void size가_0이면_예외가_발생한다() {
             ScheduledDropsRequest request = new ScheduledDropsRequest(null, null, 0);
 
-            assertThatThrownBy(() -> productService.findScheduledDrops(request))
+            assertThatThrownBy(() -> productService.findScheduledDrops(null, request))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 

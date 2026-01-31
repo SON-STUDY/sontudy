@@ -3,7 +3,6 @@ package org.son.sonstudy.domain.product.business;
 import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.exception.CustomException;
-import org.son.sonstudy.common.util.SecurityUtils;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
 import org.son.sonstudy.domain.product.application.request.ScheduledDropsRequest;
 import org.son.sonstudy.domain.product.business.response.ProductDetailResponse;
@@ -17,8 +16,6 @@ import org.son.sonstudy.domain.product.model.submodel.ProductImage;
 import org.son.sonstudy.domain.product.repository.ProductLikeRepository;
 import org.son.sonstudy.domain.product.repository.ProductNotificationRepository;
 import org.son.sonstudy.domain.product.repository.ProductRepository;
-import org.son.sonstudy.domain.user.model.Role;
-import org.son.sonstudy.domain.user.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -41,10 +38,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void register(ProductRegistrationRequest request) {
-        User user = SecurityUtils.getCurrentUser();
-
-        validateUserRole(user);
+    public void register(String userId, ProductRegistrationRequest request) {
         validateImageSize(request.imageUrls().size());
 
         Color color = createOrGetColor(request.colorName(), request.colorHexCode());
@@ -99,7 +93,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public ScheduledDropsResponse findScheduledDrops(ScheduledDropsRequest request) {
+    public ScheduledDropsResponse findScheduledDrops(String userId, ScheduledDropsRequest request) {
         int size = request.size() != null ? request.size() : 5;
         List<Product> products = productRepository.findScheduledDropsByCursor(
                 request.cursorReleasedAt(),
@@ -110,18 +104,17 @@ public class ProductServiceImpl implements ProductService {
         List<Product> content = hasNext ? products.subList(0, size) : products;
         Slice<Product> slice = new SliceImpl<>(content, Pageable.ofSize(size), hasNext);
 
-        User user = SecurityUtils.getCurrentUser();
         Set<String> likedProductIds = new HashSet<>();
         Set<String> notificationEnabledProductIds = new HashSet<>();
-        if (user != null && !content.isEmpty()) {
+        if (userId != null && !content.isEmpty()) {
             List<String> productIds = content.stream()
                     .map(Product::getId)
                     .toList();
             likedProductIds.addAll(
-                    productLikeRepository.findLikedProductIds(user.getId(), productIds)
+                    productLikeRepository.findLikedProductIds(userId, productIds)
             );
             notificationEnabledProductIds.addAll(
-                    productNotificationRepository.findNotificationEnabledProductIds(user.getId(), productIds)
+                    productNotificationRepository.findNotificationEnabledProductIds(userId, productIds)
             );
         }
 
@@ -130,12 +123,6 @@ public class ProductServiceImpl implements ProductService {
                 likedProductIds,
                 notificationEnabledProductIds
         );
-    }
-
-    private void validateUserRole(User user) {
-        if (user.getRole().equals(Role.USER)) {
-            throw new CustomException(ErrorCode.NOT_SELLER);
-        }
     }
 
     private void validateImageSize(int size) {

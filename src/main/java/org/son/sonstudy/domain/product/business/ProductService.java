@@ -9,11 +9,11 @@ import org.springframework.data.domain.Pageable;
 
 public interface ProductService {
 
-    void register(ProductRegistrationRequest request);
+    void register(String userId, ProductRegistrationRequest request);
 
     ProductResponse findAllProducts(Pageable pageable);
 
     ProductDetailResponse findProductDetail(String productId);
 
-    ScheduledDropsResponse findScheduledDrops(ScheduledDropsRequest request);
+    ScheduledDropsResponse findScheduledDrops(String userId, ScheduledDropsRequest request);
 }

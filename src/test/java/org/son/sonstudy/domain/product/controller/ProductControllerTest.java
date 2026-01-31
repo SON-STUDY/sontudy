@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.son.sonstudy.common.config.SecurityConfig;
+import org.son.sonstudy.common.exception.CommonExceptionHandler;
 import org.son.sonstudy.common.jwt.filter.JwtAuthenticationFilter;
 import org.son.sonstudy.domain.product.application.ProductController;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
@@ -18,7 +19,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.son.sonstudy.common.jwt.data.UserContext;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -26,8 +32,11 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -42,9 +51,19 @@ public class ProductControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
+    @Autowired private ProductController productController;
 
     @MockitoBean
     private ProductService productService;
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(productController)
+                .setCustomArgumentResolvers(new TestAuthenticationPrincipalArgumentResolver())
+                .setControllerAdvice(new CommonExceptionHandler())
+                .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
+                .build();
+    }
 
     @Nested
     class 상품을_등록할_때 { // 예외 테스트는 너무 많고 반복 코드가 많아서 애노테이션별로 하나씩만 진행함
@@ -68,6 +87,7 @@ public class ProductControllerTest {
 
             // when
             ResultActions perform = mockMvc.perform(post("/api/products")
+                    .principal(sellerAuthentication())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)));
 
@@ -96,6 +116,7 @@ public class ProductControllerTest {
 
             // when
             ResultActions perform = mockMvc.perform(post("/api/products")
+                    .principal(sellerAuthentication())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)));
 
@@ -125,6 +146,7 @@ public class ProductControllerTest {
 
             // when
             ResultActions perform = mockMvc.perform(post("/api/products")
+                    .principal(sellerAuthentication())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)));
 
@@ -153,6 +175,7 @@ public class ProductControllerTest {
 
             // when
             ResultActions perform = mockMvc.perform(post("/api/products")
+                    .principal(sellerAuthentication())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)));
 
@@ -188,9 +211,9 @@ public class ProductControllerTest {
                     releasedAt,
                     false
             );
-            given(productService.findScheduledDrops(any(ScheduledDropsRequest.class))).willReturn(response);
+            given(productService.findScheduledDrops(isNull(), any(ScheduledDropsRequest.class))).willReturn(response);
 
-            // when
+            // when (익명 사용자 - principal 없음)
             ResultActions perform = mockMvc.perform(get("/api/products")
                     .param("dropStatus", "scheduled")
                     .param("size", "5"));
@@ -230,6 +253,61 @@ public class ProductControllerTest {
             perform.andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("DC400_003"))
                     .andExpect(jsonPath("$.message").exists());
+        }
+    }
+
+    private UsernamePasswordAuthenticationToken sellerAuthentication() {
+        UserContext userContext = new UserContext(
+                "user-123",
+                "seller@test.com",
+                org.son.sonstudy.domain.user.model.Role.SELLER
+        );
+        return new UsernamePasswordAuthenticationToken(
+                userContext,
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_SELLER"))
+        );
+    }
+
+    private static class TestAuthenticationPrincipalArgumentResolver
+            implements org.springframework.web.method.support.HandlerMethodArgumentResolver {
+
+        @Override
+        public boolean supportsParameter(org.springframework.core.MethodParameter parameter) {
+            return parameter.hasParameterAnnotation(
+                    org.springframework.security.core.annotation.AuthenticationPrincipal.class
+            );
+        }
+
+        @Override
+        public Object resolveArgument(
+                org.springframework.core.MethodParameter parameter,
+                org.springframework.web.method.support.ModelAndViewContainer mavContainer,
+                org.springframework.web.context.request.NativeWebRequest webRequest,
+                org.springframework.web.bind.support.WebDataBinderFactory binderFactory
+        ) {
+            org.springframework.security.core.Authentication authentication =
+                    org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null && webRequest.getUserPrincipal() instanceof org.springframework.security.core.Authentication auth) {
+                authentication = auth;
+            }
+
+            if (authentication == null) {
+                org.springframework.security.core.annotation.AuthenticationPrincipal annotation =
+                        parameter.getParameterAnnotation(
+                                org.springframework.security.core.annotation.AuthenticationPrincipal.class
+                        );
+                if (annotation != null && !annotation.errorOnInvalidType()) {
+                    return null;
+                }
+                return null;
+            }
+
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof UserContext) {
+                return principal;
+            }
+            return null;
         }
     }
 
