@@ -215,7 +215,7 @@ public class ProductControllerTest {
 
             // when (익명 사용자 - principal 없음)
             ResultActions perform = mockMvc.perform(get("/api/products")
-                    .param("dropStatus", "scheduled")
+                    .param("dropStatus", "SCHEDULED")
                     .param("size", "5"));
 
             // then
@@ -232,7 +232,7 @@ public class ProductControllerTest {
         void 커서_날짜_형식이_잘못되면_예외를_응답한다() throws Exception {
             // when
             ResultActions perform = mockMvc.perform(get("/api/products")
-                    .param("dropStatus", "scheduled")
+                    .param("dropStatus", "SCHEDULED")
                     .param("cursorReleasedAt", "not-a-date")
                     .param("size", "5"));
 

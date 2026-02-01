@@ -24,7 +24,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
         return queryFactory.selectFrom(product)
                 .where(
-                        product.status.eq(ProductStatus.PREPARE),
+                        product.status.eq(ProductStatus.SCHEDULED),
                         product.releasedAt.goe(LocalDateTime.now()),
                         cursorPredicate
                 )

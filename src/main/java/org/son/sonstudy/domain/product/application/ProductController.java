@@ -5,13 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.SuccessCode;
 import org.son.sonstudy.common.api.response.ApiResponse;
 import org.son.sonstudy.common.jwt.data.UserContext;
-import org.son.sonstudy.domain.product.application.request.DropStatus;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
 import org.son.sonstudy.domain.product.application.request.ScheduledDropsRequest;
 import org.son.sonstudy.domain.product.business.ProductService;
 import org.son.sonstudy.domain.product.business.response.ProductDetailResponse;
 import org.son.sonstudy.domain.product.business.response.ProductResponse;
 import org.son.sonstudy.domain.product.business.response.ScheduledDropsResponse;
+import org.son.sonstudy.domain.product.model.ProductStatus;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.exception.CustomException;
 import org.springframework.data.domain.Pageable;
@@ -61,11 +61,10 @@ public class ProductController {
     @GetMapping(params = "dropStatus")
     public ResponseEntity<ApiResponse<ScheduledDropsResponse>> getDropsByStatus(
             @AuthenticationPrincipal(errorOnInvalidType = false) UserContext userContext,
-            @RequestParam String dropStatus,
+            @RequestParam ProductStatus dropStatus,
             @ModelAttribute ScheduledDropsRequest request
     ) {
-        DropStatus status = DropStatus.from(dropStatus);
-        if (status != DropStatus.SCHEDULED) {
+        if (dropStatus != ProductStatus.SCHEDULED) {
             throw new CustomException(ErrorCode.BAD_REQUEST);
         } // 다른 dropStatus 확장 시 분기 추가 하면 됨
 

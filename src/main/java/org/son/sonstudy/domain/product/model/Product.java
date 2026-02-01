@@ -71,7 +71,7 @@ public class Product {
                 .color(color)
                 .releasedAt(releasedAt)
                 .category(category)
-                .status(ProductStatus.PREPARE)
+                .status(ProductStatus.SCHEDULED)
                 .build();
     }
 
