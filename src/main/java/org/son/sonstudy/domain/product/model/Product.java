@@ -28,6 +28,9 @@ public class Product {
     @Column(nullable = false)
     private String description;
 
+    @Column(nullable = false)
+    private String brand;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "color_id")
     private Color color;
@@ -48,25 +51,27 @@ public class Product {
     private List<ProductOption> options = new ArrayList<>();
 
     @Builder
-    private Product(String name, String description, Color color,
+    private Product(String name, String description, String brand, Color color,
                     LocalDateTime releasedAt, ProductCategory category, ProductStatus status) {
         this.name = name;
         this.description = description;
+        this.brand = brand;
         this.color = color;
         this.releasedAt = releasedAt;
         this.category = category;
         this.status = status;
     }
 
-    public static Product createProduct(String name, String description, Color color,
+    public static Product createProduct(String name, String description, String brand, Color color,
                                         LocalDateTime releasedAt, ProductCategory category) {
         return Product.builder()
                 .name(name)
                 .description(description)
+                .brand(brand)
                 .color(color)
                 .releasedAt(releasedAt)
                 .category(category)
-                .status(ProductStatus.PREPARE)
+                .status(ProductStatus.SCHEDULED)
                 .build();
     }
 

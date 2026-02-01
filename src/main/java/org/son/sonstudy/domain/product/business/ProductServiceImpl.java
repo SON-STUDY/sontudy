@@ -4,18 +4,28 @@ import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.exception.CustomException;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
+import org.son.sonstudy.domain.product.application.request.ScheduledDropsRequest;
 import org.son.sonstudy.domain.product.business.response.ProductDetailResponse;
 import org.son.sonstudy.domain.product.business.response.ProductResponse;
+import org.son.sonstudy.domain.product.business.response.ScheduledDropsResponse;
 import org.son.sonstudy.domain.product.model.Product;
 import org.son.sonstudy.domain.product.model.ProductOption;
 import org.son.sonstudy.domain.product.model.submodel.Color;
 import org.son.sonstudy.domain.product.model.submodel.ColorRepository;
 import org.son.sonstudy.domain.product.model.submodel.ProductImage;
+import org.son.sonstudy.domain.product.repository.ProductLikeRepository;
+import org.son.sonstudy.domain.product.repository.ProductNotificationRepository;
 import org.son.sonstudy.domain.product.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -23,10 +33,12 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final ColorRepository colorRepository;
+    private final ProductLikeRepository productLikeRepository;
+    private final ProductNotificationRepository productNotificationRepository;
 
     @Override
     @Transactional
-    public void register(ProductRegistrationRequest request) {
+    public void register(String userId, ProductRegistrationRequest request) {
         validateImageSize(request.imageUrls().size());
 
         Color color = createOrGetColor(request.colorName(), request.colorHexCode());
@@ -34,6 +46,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = Product.createProduct(
                 request.name(),
                 request.description(),
+                request.brand(),
                 color,
                 request.releasedAt(),
                 request.category()
@@ -76,6 +89,40 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
         return ProductDetailResponse.from(product);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ScheduledDropsResponse findScheduledDrops(String userId, ScheduledDropsRequest request) {
+        int size = request.size() != null ? request.size() : 5;
+        List<Product> products = productRepository.findScheduledDropsByCursor(
+                request.cursorReleasedAt(),
+                request.cursorId(),
+                size);
+
+        boolean hasNext = products.size() > size;
+        List<Product> content = hasNext ? products.subList(0, size) : products;
+        Slice<Product> slice = new SliceImpl<>(content, Pageable.ofSize(size), hasNext);
+
+        Set<String> likedProductIds = new HashSet<>();
+        Set<String> notificationEnabledProductIds = new HashSet<>();
+        if (userId != null && !content.isEmpty()) {
+            List<String> productIds = content.stream()
+                    .map(Product::getId)
+                    .toList();
+            likedProductIds.addAll(
+                    productLikeRepository.findLikedProductIds(userId, productIds)
+            );
+            notificationEnabledProductIds.addAll(
+                    productNotificationRepository.findNotificationEnabledProductIds(userId, productIds)
+            );
+        }
+
+        return ScheduledDropsResponse.from(
+                slice,
+                likedProductIds,
+                notificationEnabledProductIds
+        );
     }
 
     private void validateImageSize(int size) {

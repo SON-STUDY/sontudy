@@ -18,6 +18,9 @@ public record ProductRegistrationRequest(
         @NotBlank(message = "상품 설명은 필수입니다.")
         String description,
 
+        @NotBlank(message = "브랜드는 필수입니다.")
+        String brand,
+
         @NotBlank(message = "색상 이름은 필수입니다.")
         String colorName,
 
