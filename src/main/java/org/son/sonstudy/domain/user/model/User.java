@@ -6,6 +6,10 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.son.sonstudy.domain.product.model.ProductLike;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -31,6 +35,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductLike> likes = new ArrayList<>();
+
     @Builder
     public User(String name, String email, String password, Role role) {
         this.name = name;
@@ -41,5 +48,15 @@ public class User {
 
     public void approveSeller() {
         this.role = Role.SELLER;
+    }
+
+    public void addLike(ProductLike like) {
+        if (!this.likes.contains(like)) {
+            this.likes.add(like);
+        }
+    }
+
+    public void removeLike(ProductLike like) {
+        this.likes.remove(like);
     }
 }

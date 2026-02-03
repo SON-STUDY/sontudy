@@ -14,6 +14,8 @@ java {
     }
 }
 
+def querydslGeneratedDir = "$buildDir/generated/querydsl"
+
 repositories {
     mavenCentral()
 }
@@ -44,6 +46,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.10.3'
 
+    // querydsl
+    implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
+    annotationProcessor 'com.querydsl:querydsl-apt:5.1.0:jakarta'
+    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+
     // mysql
     runtimeOnly 'com.mysql:mysql-connector-j'
 
@@ -52,6 +60,14 @@ dependencies {
 
     // test
     testRuntimeOnly 'com.h2database:h2'
+}
+
+sourceSets {
+    main.java.srcDirs += [querydslGeneratedDir]
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.generatedSourceOutputDirectory = file(querydslGeneratedDir)
 }
 
 tasks.named('test') {

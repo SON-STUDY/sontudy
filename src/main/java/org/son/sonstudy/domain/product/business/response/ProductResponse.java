@@ -33,6 +33,7 @@ public record ProductResponse(
 
     public record ProductElement(
             String id,
+            String brand,
             String name,
             String thumbnailUrl,
             ProductCategory category,
@@ -47,6 +48,7 @@ public record ProductResponse(
 
             return new ProductElement(
                     product.getId(),
+                    product.getBrand(),
                     product.getName(),
                     thumbnailUrl,
                     product.getCategory(),
