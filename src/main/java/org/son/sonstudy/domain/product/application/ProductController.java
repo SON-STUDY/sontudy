@@ -2,18 +2,19 @@ package org.son.sonstudy.domain.product.application;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.api.code.SuccessCode;
 import org.son.sonstudy.common.api.response.ApiResponse;
+import org.son.sonstudy.common.exception.CustomException;
 import org.son.sonstudy.common.jwt.data.UserContext;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
 import org.son.sonstudy.domain.product.application.request.ScheduledDropsRequest;
 import org.son.sonstudy.domain.product.business.ProductService;
 import org.son.sonstudy.domain.product.business.response.ProductDetailResponse;
+import org.son.sonstudy.domain.product.business.response.ProductLiveResponse;
 import org.son.sonstudy.domain.product.business.response.ProductResponse;
 import org.son.sonstudy.domain.product.business.response.ScheduledDropsResponse;
 import org.son.sonstudy.domain.product.model.ProductStatus;
-import org.son.sonstudy.common.api.code.ErrorCode;
-import org.son.sonstudy.common.exception.CustomException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -71,6 +72,16 @@ public class ProductController {
         String userId = userContext != null ? userContext.userId() : null;
         ScheduledDropsRequest normalized = request.normalize(5);
         ScheduledDropsResponse response = productService.findScheduledDrops(userId, normalized);
+        return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
+    }
+
+    @GetMapping("/live")
+    public ResponseEntity<ApiResponse<ProductLiveResponse>> getLiveDrops(
+            @AuthenticationPrincipal(errorOnInvalidType = false) UserContext userContext,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
+        String userId = userContext != null ? userContext.userId() : null;
+        ProductLiveResponse response = productService.findLiveDrops(userId, pageable);
         return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
     }
 }

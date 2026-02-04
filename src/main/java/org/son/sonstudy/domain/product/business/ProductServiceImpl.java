@@ -6,6 +6,7 @@ import org.son.sonstudy.common.exception.CustomException;
 import org.son.sonstudy.domain.product.application.request.ProductRegistrationRequest;
 import org.son.sonstudy.domain.product.application.request.ScheduledDropsRequest;
 import org.son.sonstudy.domain.product.business.response.ProductDetailResponse;
+import org.son.sonstudy.domain.product.business.response.ProductLiveResponse;
 import org.son.sonstudy.domain.product.business.response.ProductResponse;
 import org.son.sonstudy.domain.product.business.response.ScheduledDropsResponse;
 import org.son.sonstudy.domain.product.model.Product;
@@ -119,6 +120,39 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return ScheduledDropsResponse.from(
+                slice,
+                likedProductIds,
+                notificationEnabledProductIds
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductLiveResponse findLiveDrops(String userId, Pageable pageable) {
+        Slice<Product> slice;
+
+        if (userId == null) {
+            slice = productRepository.findLiveDropsWithoutUser(pageable);
+            return ProductLiveResponse.from(slice, new HashSet<>(), new HashSet<>());
+        }
+
+        slice = productRepository.findLiveDrops(userId, pageable);
+
+        Set<String> likedProductIds = new HashSet<>();
+        Set<String> notificationEnabledProductIds = new HashSet<>();
+        if (!slice.isEmpty()) {
+            List<String> productIds = slice.getContent().stream()
+                    .map(Product::getId)
+                    .toList();
+            likedProductIds.addAll(
+                    productLikeRepository.findLikedProductIds(userId, productIds)
+            );
+            notificationEnabledProductIds.addAll(
+                    productNotificationRepository.findNotificationEnabledProductIds(userId, productIds)
+            );
+        }
+
+        return ProductLiveResponse.from(
                 slice,
                 likedProductIds,
                 notificationEnabledProductIds
