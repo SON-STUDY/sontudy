@@ -11,6 +11,4 @@ public interface ProductRepositoryCustom {
     List<Product> findScheduledDropsByCursor(LocalDateTime cursorReleasedAt, String cursorId, int size);
 
     Slice<Product> findLiveDrops(String userId, Pageable pageable);
-
-    Slice<Product> findLiveDropsWithoutUser(Pageable pageable);
 }

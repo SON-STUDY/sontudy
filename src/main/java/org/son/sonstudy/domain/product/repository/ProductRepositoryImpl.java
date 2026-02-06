@@ -3,6 +3,7 @@ package org.son.sonstudy.domain.product.repository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.domain.product.model.*;
@@ -52,54 +53,26 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                 .when(product.status.eq(ProductStatus.ON_SALE)).then(0)
                 .otherwise(1);
 
-        List<Product> content = queryFactory
+        JPAQuery<Product> query = queryFactory
                 .selectFrom(product)
-                .leftJoin(product.options, option)
-                .leftJoin(productLike).on(product.id.eq(productLike.product.id)
-                        .and(productLike.user.id.eq(userId)))
-                .where(
-                        product.status.eq(ProductStatus.ON_SALE)
-                                .or(product.status.eq(ProductStatus.END).and(option.stock.gt(0)))
-                )
-                .groupBy(product.id)
-                .orderBy(
-                        likeOrder.asc(),          // 1. 좋아요 먼저
-                        statusOrder.asc(),        // 2. ON_SALE 상태 먼저
-                        option.stock.sum().asc(), // 3. 재고 적은 순
-                        product.id.desc()
-                )
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize() + 1)
-                .fetch();
+                .leftJoin(product.options, option);
 
-        boolean hasNext = content.size() > pageable.getPageSize();
-        if (hasNext) {
-            content.remove(content.size() - 1);
+        if (userId != null) {
+            query.leftJoin(productLike).on(product.id.eq(productLike.product.id)
+                    .and(productLike.user.id.eq(userId)));
         }
 
-        return new SliceImpl<>(content, pageable, hasNext);
-    }
-
-    @Override
-    public Slice<Product> findLiveDropsWithoutUser(Pageable pageable) {
-        QProduct product = QProduct.product;
-        QProductOption option = QProductOption.productOption;
-
-        NumberExpression<Integer> statusOrder = new CaseBuilder()
-                .when(product.status.eq(ProductStatus.ON_SALE)).then(0)
-                .otherwise(1);
-
-        List<Product> content = queryFactory
-                .selectFrom(product)
-                .leftJoin(product.options, option)
+        List<Product> content = query
                 .where(
                         product.status.eq(ProductStatus.ON_SALE)
                                 .or(product.status.eq(ProductStatus.END).and(option.stock.gt(0)))
                 )
                 .groupBy(product.id)
                 .orderBy(
-                        statusOrder.asc(),
-                        option.stock.sum().asc(),
+                        // userId가 있을 때만 likeOrder 적용, 없으면 null 처리되어 무시됨
+                        userId != null ? likeOrder.asc() : null,
+                        statusOrder.asc(),        // 1. (혹은 2.) ON_SALE 상태 먼저
+                        option.stock.sum().asc(), // 2. (혹은 3.) 재고 적은 순
                         product.id.desc()
                 )
                 .offset(pageable.getOffset())

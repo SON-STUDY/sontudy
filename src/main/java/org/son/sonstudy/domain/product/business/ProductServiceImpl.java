@@ -131,11 +131,6 @@ public class ProductServiceImpl implements ProductService {
     public ProductLiveResponse findLiveDrops(String userId, Pageable pageable) {
         Slice<Product> slice;
 
-        if (userId == null) {
-            slice = productRepository.findLiveDropsWithoutUser(pageable);
-            return ProductLiveResponse.from(slice, new HashSet<>(), new HashSet<>());
-        }
-
         slice = productRepository.findLiveDrops(userId, pageable);
 
         Set<String> likedProductIds = new HashSet<>();
