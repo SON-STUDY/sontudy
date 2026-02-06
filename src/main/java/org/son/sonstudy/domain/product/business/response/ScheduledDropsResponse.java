@@ -8,6 +8,7 @@ import org.springframework.data.domain.Slice;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public record ScheduledDropsResponse(
@@ -19,13 +20,15 @@ public record ScheduledDropsResponse(
     public static ScheduledDropsResponse from(
             Slice<Product> products,
             Set<String> likedProductIds,
-            Set<String> notificationEnabledProductIds
+            Set<String> notificationEnabledProductIds,
+            Map<String, List<ProductOption>> optionsByProductId
     ) {
         List<ScheduledDropElement> content = products.getContent().stream()
                 .map(product -> ScheduledDropElement.from(
                         product,
                         likedProductIds.contains(product.getId()),
-                        notificationEnabledProductIds.contains(product.getId())
+                        notificationEnabledProductIds.contains(product.getId()),
+                        optionsByProductId.getOrDefault(product.getId(), List.of())
                 ))
                 .toList();
 
@@ -56,19 +59,20 @@ public record ScheduledDropsResponse(
         public static ScheduledDropElement from(
                 Product product,
                 boolean liked,
-                boolean notificationEnabled
+                boolean notificationEnabled,
+                List<ProductOption> options
         ) {
             String imageUrl = product.getImages().stream()
                     .min(Comparator.comparingInt(ProductImage::getOrders))
                     .map(ProductImage::getImageUrl)
                     .orElse(null);
 
-            int price = product.getOptions().stream()
+            int price = options.stream()
                     .mapToInt(ProductOption::getCost)
                     .min()
                     .orElse(0);
 
-            int stock = product.getOptions().stream()
+            int stock = options.stream()
                     .mapToInt(ProductOption::getStock)
                     .sum();
 

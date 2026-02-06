@@ -55,7 +55,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
         JPAQuery<Product> query = queryFactory
                 .selectFrom(product)
-                .leftJoin(product.options, option);
+                .leftJoin(option).on(option.product.id.eq(product.id));
 
         if (userId != null) {
             query.leftJoin(productLike).on(product.id.eq(productLike.product.id)

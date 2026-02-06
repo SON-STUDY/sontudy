@@ -16,6 +16,7 @@ import org.son.sonstudy.domain.product.model.submodel.ColorRepository;
 import org.son.sonstudy.domain.product.model.submodel.ProductImage;
 import org.son.sonstudy.domain.product.repository.ProductLikeRepository;
 import org.son.sonstudy.domain.product.repository.ProductNotificationRepository;
+import org.son.sonstudy.domain.product.repository.ProductOptionRepository;
 import org.son.sonstudy.domain.product.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +39,7 @@ public class ProductServiceImpl implements ProductService {
     private final ColorRepository colorRepository;
     private final ProductLikeRepository productLikeRepository;
     private final ProductNotificationRepository productNotificationRepository;
+    private final ProductOptionRepository productOptionRepository;
 
     @Override
     @Transactional
@@ -53,16 +57,6 @@ public class ProductServiceImpl implements ProductService {
                 request.category()
         );
 
-        for (var optionDto : request.options()) {
-            ProductOption option = ProductOption.builder()
-                    .size(optionDto.size())
-                    .cost(optionDto.cost())
-                    .stock(optionDto.stock())
-                    .build();
-
-            product.addOption(option);
-        }
-
         for (int i = 0; i < request.imageUrls().size(); i++) {
             ProductImage image = ProductImage.builder()
                     .imageUrl(request.imageUrls().get(i))
@@ -73,6 +67,17 @@ public class ProductServiceImpl implements ProductService {
         }
 
         productRepository.save(product);
+
+        for (var optionDto : request.options()) {
+            ProductOption option = ProductOption.builder()
+                    .size(optionDto.size())
+                    .cost(optionDto.cost())
+                    .stock(optionDto.stock())
+                    .build();
+
+            option.setProduct(product);
+            productOptionRepository.save(option);
+        }
     }
 
     @Override
@@ -89,7 +94,9 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-        return ProductDetailResponse.from(product);
+        List<ProductOption> options = productOptionRepository.findByProductId(productId);
+
+        return ProductDetailResponse.from(product, options);
     }
 
     @Override
@@ -107,50 +114,66 @@ public class ProductServiceImpl implements ProductService {
 
         Set<String> likedProductIds = new HashSet<>();
         Set<String> notificationEnabledProductIds = new HashSet<>();
-        if (userId != null && !content.isEmpty()) {
+        Map<String, List<ProductOption>> optionsByProductId = Map.of();
+
+        if (!content.isEmpty()) {
             List<String> productIds = content.stream()
                     .map(Product::getId)
                     .toList();
-            likedProductIds.addAll(
-                    productLikeRepository.findLikedProductIds(userId, productIds)
-            );
-            notificationEnabledProductIds.addAll(
-                    productNotificationRepository.findNotificationEnabledProductIds(userId, productIds)
-            );
+
+            optionsByProductId = productOptionRepository.findByProductIds(productIds).stream()
+                    .collect(Collectors.groupingBy(option -> option.getProduct().getId()));
+
+            if (userId != null) {
+                likedProductIds.addAll(
+                        productLikeRepository.findLikedProductIds(userId, productIds)
+                );
+                notificationEnabledProductIds.addAll(
+                        productNotificationRepository.findNotificationEnabledProductIds(userId, productIds)
+                );
+            }
         }
 
         return ScheduledDropsResponse.from(
                 slice,
                 likedProductIds,
-                notificationEnabledProductIds
+                notificationEnabledProductIds,
+                optionsByProductId
         );
     }
 
     @Override
     @Transactional(readOnly = true)
     public ProductLiveResponse findLiveDrops(String userId, Pageable pageable) {
-        Slice<Product> slice;
-
-        slice = productRepository.findLiveDrops(userId, pageable);
+        Slice<Product> slice = productRepository.findLiveDrops(userId, pageable);
 
         Set<String> likedProductIds = new HashSet<>();
         Set<String> notificationEnabledProductIds = new HashSet<>();
+        Map<String, List<ProductOption>> optionsByProductId = Map.of();
+
         if (!slice.isEmpty()) {
             List<String> productIds = slice.getContent().stream()
                     .map(Product::getId)
                     .toList();
-            likedProductIds.addAll(
-                    productLikeRepository.findLikedProductIds(userId, productIds)
-            );
-            notificationEnabledProductIds.addAll(
-                    productNotificationRepository.findNotificationEnabledProductIds(userId, productIds)
-            );
+
+            optionsByProductId = productOptionRepository.findByProductIds(productIds).stream()
+                    .collect(Collectors.groupingBy(option -> option.getProduct().getId()));
+
+            if (userId != null) {
+                likedProductIds.addAll(
+                        productLikeRepository.findLikedProductIds(userId, productIds)
+                );
+                notificationEnabledProductIds.addAll(
+                        productNotificationRepository.findNotificationEnabledProductIds(userId, productIds)
+                );
+            }
         }
 
         return ProductLiveResponse.from(
                 slice,
                 likedProductIds,
-                notificationEnabledProductIds
+                notificationEnabledProductIds,
+                optionsByProductId
         );
     }
 

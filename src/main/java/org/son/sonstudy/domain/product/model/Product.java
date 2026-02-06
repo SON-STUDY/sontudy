@@ -47,9 +47,6 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private ProductStatus status;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<ProductOption> options = new ArrayList<>();
-
     @Builder
     private Product(String name, String description, String brand, Color color,
                     LocalDateTime releasedAt, ProductCategory category, ProductStatus status) {
@@ -73,11 +70,6 @@ public class Product {
                 .category(category)
                 .status(ProductStatus.SCHEDULED)
                 .build();
-    }
-
-    public void addOption(ProductOption option) {
-        this.options.add(option);
-        option.setProduct(this);
     }
 
     public void addImage(ProductImage image) {
