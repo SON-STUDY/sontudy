@@ -2,6 +2,7 @@ package org.son.sonstudy.domain.product.business.response;
 
 import org.son.sonstudy.domain.product.model.Product;
 import org.son.sonstudy.domain.product.model.ProductOption;
+import org.son.sonstudy.domain.product.model.ProductStatus;
 import org.son.sonstudy.domain.product.model.submodel.ProductImage;
 import org.springframework.data.domain.Slice;
 
@@ -44,6 +45,8 @@ public record ProductLiveResponse(
             String brand,
             String name,
             int price,
+            int stock,
+            ProductStatus status,
             boolean notificationEnabled,
             boolean liked
     ) {
@@ -62,6 +65,11 @@ public record ProductLiveResponse(
                     .min()
                     .orElse(0);
 
+            int stock = product.getOptions().stream()
+                    .mapToInt(ProductOption::getStock)
+                    .min()
+                    .orElse(0);
+
             return new ProductLiveElement(
                     product.getId(),
                     imageUrl,
@@ -69,6 +77,8 @@ public record ProductLiveResponse(
                     product.getBrand(),
                     product.getName(),
                     price,
+                    stock,
+                    product.getStatus(),
                     notificationEnabled,
                     liked
             );
