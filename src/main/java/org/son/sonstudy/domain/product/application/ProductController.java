@@ -78,7 +78,7 @@ public class ProductController {
     @GetMapping("/live")
     public ResponseEntity<ApiResponse<ProductLiveResponse>> getLiveDrops(
             @AuthenticationPrincipal(errorOnInvalidType = false) UserContext userContext,
-            @PageableDefault(size = 10) Pageable pageable
+            @PageableDefault(size = 3) Pageable pageable
     ) {
         String userId = userContext != null ? userContext.userId() : null;
         ProductLiveResponse response = productService.findLiveDrops(userId, pageable);
