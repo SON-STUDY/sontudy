@@ -23,13 +23,13 @@ public record ProductDetailResponse(
         LocalDateTime releasedAt,
         List<OptionResponse> options
 ) {
-    public static ProductDetailResponse from(Product product) {
+    public static ProductDetailResponse from(Product product, List<ProductOption> options) {
         List<String> images = product.getImages().stream()
                 .sorted(Comparator.comparingInt(ProductImage::getOrders))
                 .map(ProductImage::getImageUrl)
                 .toList();
 
-        List<OptionResponse> options = product.getOptions().stream()
+        List<OptionResponse> optionResponses = options.stream()
                 .map(OptionResponse::from)
                 .toList();
 
@@ -44,7 +44,7 @@ public record ProductDetailResponse(
                 product.getCategory(),
                 product.getStatus(),
                 product.getReleasedAt(),
-                options
+                optionResponses
         );
     }
 

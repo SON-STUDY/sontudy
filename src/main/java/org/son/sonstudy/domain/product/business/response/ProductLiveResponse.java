@@ -2,6 +2,7 @@ package org.son.sonstudy.domain.product.business.response;
 
 import org.son.sonstudy.domain.product.model.Product;
 import org.son.sonstudy.domain.product.model.ProductOption;
+import org.son.sonstudy.domain.product.model.ProductStatus;
 import org.son.sonstudy.domain.product.model.submodel.ProductImage;
 import org.springframework.data.domain.Slice;
 
@@ -11,20 +12,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public record ScheduledDropsResponse(
-        List<ScheduledDropElement> content,
-        String nextCursorId,
-        LocalDateTime nextCursorReleasedAt,
+public record ProductLiveResponse(
+        List<ProductLiveElement> content,
+        int pageNumber,
+        int pageSize,
         boolean hasNext
 ) {
-    public static ScheduledDropsResponse from(
-            Slice<Product> products,
+    public static ProductLiveResponse from(
+            Slice<Product> slice,
             Set<String> likedProductIds,
             Set<String> notificationEnabledProductIds,
             Map<String, List<ProductOption>> optionsByProductId
     ) {
-        List<ScheduledDropElement> content = products.getContent().stream()
-                .map(product -> ScheduledDropElement.from(
+        List<ProductLiveElement> content = slice.getContent().stream()
+                .map(product -> ProductLiveElement.from(
                         product,
                         likedProductIds.contains(product.getId()),
                         notificationEnabledProductIds.contains(product.getId()),
@@ -32,20 +33,15 @@ public record ScheduledDropsResponse(
                 ))
                 .toList();
 
-        if (content.isEmpty()) {
-            return new ScheduledDropsResponse(content, null, null, false);
-        }
-
-        ScheduledDropElement last = content.get(content.size() - 1);
-        return new ScheduledDropsResponse(
+        return new ProductLiveResponse(
                 content,
-                last.id(),
-                last.releasedAt(),
-                products.hasNext()
+                slice.getNumber(),
+                slice.getSize(),
+                slice.hasNext()
         );
     }
 
-    public record ScheduledDropElement(
+    public record ProductLiveElement(
             String id,
             String imageUrl,
             LocalDateTime releasedAt,
@@ -53,10 +49,11 @@ public record ScheduledDropsResponse(
             String name,
             int price,
             int stock,
+            ProductStatus status,
             boolean notificationEnabled,
             boolean liked
     ) {
-        public static ScheduledDropElement from(
+        public static ProductLiveElement from(
                 Product product,
                 boolean liked,
                 boolean notificationEnabled,
@@ -74,9 +71,10 @@ public record ScheduledDropsResponse(
 
             int stock = options.stream()
                     .mapToInt(ProductOption::getStock)
-                    .sum();
+                    .min()
+                    .orElse(0);
 
-            return new ScheduledDropElement(
+            return new ProductLiveElement(
                     product.getId(),
                     imageUrl,
                     product.getReleasedAt(),
@@ -84,6 +82,7 @@ public record ScheduledDropsResponse(
                     product.getName(),
                     price,
                     stock,
+                    product.getStatus(),
                     notificationEnabled,
                     liked
             );
