@@ -32,16 +32,21 @@ public class ProductOption {
     @Column(nullable = false)
     private Long totalSales;
 
+    @Enumerated(EnumType.STRING)
+    private ProductStatus status;
+
     @Builder
-    public ProductOption(int size, int cost, int stock) {
+    public ProductOption(int size, int cost, int stock, ProductStatus status) {
         validateSize(size);
         validateCost(cost);
         validateStock(stock);
+        validateStatus(status);
 
         this.size = size;
         this.cost = cost;
         this.stock = stock;
         this.totalSales = 0L;
+        this.status = status;
     }
 
     private void validateSize(int size) {
@@ -61,4 +66,10 @@ public class ProductOption {
             throw new CustomException(ErrorCode.INVALID_STOCK);
         }
     }
+    private void validateStatus(ProductStatus status) {
+        if (status == null) {
+            throw new CustomException(ErrorCode.INVALID_PRODUCT_STATE);
+        }
+    }
+
 }

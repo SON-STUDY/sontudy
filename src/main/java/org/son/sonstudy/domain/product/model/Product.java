@@ -44,19 +44,20 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private ProductCategory category;
 
-    @Enumerated(EnumType.STRING)
-    private ProductStatus status;
+    @Column(nullable = false)
+    private Boolean isDisplay;
+
 
     @Builder
     private Product(String name, String description, String brand, Color color,
-                    LocalDateTime releasedAt, ProductCategory category, ProductStatus status) {
+                    LocalDateTime releasedAt, ProductCategory category, Boolean isDisplay) {
         this.name = name;
         this.description = description;
         this.brand = brand;
         this.color = color;
         this.releasedAt = releasedAt;
         this.category = category;
-        this.status = status;
+        this.isDisplay = isDisplay;
     }
 
     public static Product createProduct(String name, String description, String brand, Color color,
@@ -68,7 +69,7 @@ public class Product {
                 .color(color)
                 .releasedAt(releasedAt)
                 .category(category)
-                .status(ProductStatus.SCHEDULED)
+                .isDisplay(true)
                 .build();
     }
 
