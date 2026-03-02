@@ -44,13 +44,16 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private ProductCategory category;
 
+    @Enumerated(EnumType.STRING)
+    private ProductStatus status;
+
     @Column(nullable = false)
     private Boolean isDisplay;
 
 
     @Builder
     private Product(String name, String description, String brand, Color color,
-                    LocalDateTime releasedAt, ProductCategory category, Boolean isDisplay) {
+                    LocalDateTime releasedAt, ProductCategory category, ProductStatus status, Boolean isDisplay) {
         this.name = name;
         this.description = description;
         this.brand = brand;
@@ -70,6 +73,7 @@ public class Product {
                 .releasedAt(releasedAt)
                 .category(category)
                 .isDisplay(true)
+                .status(ProductStatus.SCHEDULED)
                 .build();
     }
 
