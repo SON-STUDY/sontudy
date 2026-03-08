@@ -84,4 +84,15 @@ public class ProductController {
         ProductLiveResponse response = productService.findLiveDrops(userId, pageable);
         return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
     }
+
+    @GetMapping("/brand")
+    public ResponseEntity<ApiResponse<ProductResponse>> getProductsByBrand(
+            @RequestParam String brand,
+            @PageableDefault(size = 10, sort = "releasedAt", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        ProductResponse response = productService.findAllProductsByBrand(brand, pageable);
+
+        return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
+
+    }
 }
