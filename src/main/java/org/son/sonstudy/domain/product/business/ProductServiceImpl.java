@@ -90,6 +90,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
+    public ProductResponse findAllProductsByBrand(String brand, Pageable pageable) {
+        Page<Product> products = productRepository.findByBrandIgnoreCase(brand, pageable);
+
+        return ProductResponse.from(products);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public ProductDetailResponse findProductDetail(String productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
