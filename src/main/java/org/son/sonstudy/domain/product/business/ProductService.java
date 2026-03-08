@@ -14,6 +14,8 @@ public interface ProductService {
 
     ProductResponse findAllProducts(Pageable pageable);
 
+    ProductResponse findAllProductsByBrand(String brand, Pageable pageable);
+
     ProductDetailResponse findProductDetail(String productId);
 
     ScheduledDropsResponse findScheduledDrops(String userId, ScheduledDropsRequest request);
