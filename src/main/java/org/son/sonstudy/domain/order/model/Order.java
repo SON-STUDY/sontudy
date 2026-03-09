@@ -67,6 +67,7 @@ public class Order {
                 .user(user)
                 .product(productOption.getProduct())
                 .productOption(productOption)
+                .delivery(Delivery.createReady())
                 .cost(cost)
                 .status(OrderStatus.PURCHASED)
                 .orderDate(LocalDateTime.now())
