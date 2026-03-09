@@ -25,4 +25,10 @@ public class Delivery {
 
     @Enumerated(EnumType.STRING)
     private DeliveryStatus status;
+
+    public static Delivery createReady() {
+        Delivery delivery = new Delivery();
+        delivery.status = DeliveryStatus.READY;
+        return delivery;
+    }
 }
