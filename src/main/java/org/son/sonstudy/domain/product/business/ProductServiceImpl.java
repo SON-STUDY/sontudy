@@ -11,6 +11,7 @@ import org.son.sonstudy.domain.product.business.response.ProductResponse;
 import org.son.sonstudy.domain.product.business.response.ScheduledDropsResponse;
 import org.son.sonstudy.domain.product.model.Product;
 import org.son.sonstudy.domain.product.model.ProductOption;
+import org.son.sonstudy.domain.product.model.ProductStatus;
 import org.son.sonstudy.domain.product.model.submodel.Color;
 import org.son.sonstudy.domain.product.model.submodel.ColorRepository;
 import org.son.sonstudy.domain.product.model.submodel.ProductImage;
@@ -91,7 +92,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public ProductResponse findAllProductsByBrand(String brand, Pageable pageable) {
-        Page<Product> products = productRepository.findByBrandIgnoreCase(brand, pageable);
+        Page<Product> products = productRepository.findByBrandIgnoreCase(brand, ProductStatus.ON_SALE, pageable);
 
         return ProductResponse.from(products);
     }
