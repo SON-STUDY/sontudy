@@ -80,7 +80,7 @@ public class ProductController {
             @AuthenticationPrincipal(errorOnInvalidType = false) UserContext userContext,
             @PageableDefault(size = 3) Pageable pageable
     ) {
-        String userId = userContext != null ? userContext.userId() : null;
+        String userId = userContext.userId();
         ProductLiveResponse response = productService.findLiveDrops(userId, pageable);
         return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
     }
