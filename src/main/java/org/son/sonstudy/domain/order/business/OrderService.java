@@ -3,14 +3,12 @@ package org.son.sonstudy.domain.order.business;
 import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.exception.CustomException;
-import org.son.sonstudy.domain.delivery.model.DeliveryStatus;
 import org.son.sonstudy.domain.order.application.request.CheckoutRequest;
 import org.son.sonstudy.domain.order.application.request.OrderHistoryRequest;
 import org.son.sonstudy.domain.order.business.response.CheckoutResponse;
 import org.son.sonstudy.domain.order.business.response.OrderHistoryResponse;
 import org.son.sonstudy.domain.order.model.Order;
 import org.son.sonstudy.domain.order.repository.OrderRepository;
-import org.son.sonstudy.domain.order.repository.OrderRepositoryCustom;
 import org.son.sonstudy.domain.payment.business.pg.PaymentApproveCommand;
 import org.son.sonstudy.domain.payment.business.pg.PaymentGateway;
 import org.son.sonstudy.domain.payment.business.pg.PaymentGatewayResult;
@@ -39,38 +37,25 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderHistoryResponse getOrderHistory(String userId, OrderHistoryRequest request) {
         int size = request.sizeOrDefault();
-        List<OrderRepositoryCustom.OrderHistoryRow> rows = orderRepository.findOrderHistoryByCursor(
+        List<OrderHistoryResponse.OrderHistoryItem> orderHistories = orderRepository.findOrderHistoryByCursor(
                 userId,
                 request.cursorOrderDate(),
                 request.cursorOrderId(),
                 size
         );
-
-        boolean hasNext = rows.size() > size;
-        List<OrderRepositoryCustom.OrderHistoryRow> contentRows = hasNext ? rows.subList(0, size) : rows;
-        List<OrderHistoryResponse.OrderHistoryItem> content = contentRows.stream()
-                .map(row -> OrderHistoryResponse.OrderHistoryItem.of(
-                        row.orderId(),
-                        row.orderedAt(),
-                        row.orderStatus(),
-                        row.productName(),
-                        row.productImageUrl(),
-                        row.size(),
-                        row.amount(),
-                        row.deliveryStatus() != null ? row.deliveryStatus() : DeliveryStatus.READY,
-                        row.trackingNumber()
-                ))
-                .toList();
+        
+        boolean hasNext = orderHistories.size() > size;
+        List<OrderHistoryResponse.OrderHistoryItem> orderHistoryRows = hasNext ? orderHistories.subList(0, size) : orderHistories;
 
         LocalDateTime nextCursorOrderDate = null;
         String nextCursorOrderId = null;
-        if (hasNext && !contentRows.isEmpty()) {
-            OrderRepositoryCustom.OrderHistoryRow last = contentRows.get(contentRows.size() - 1);
+        if (hasNext && !orderHistoryRows.isEmpty()) {
+            OrderHistoryResponse.OrderHistoryItem last = orderHistoryRows.get(orderHistoryRows.size() - 1);
             nextCursorOrderDate = last.orderedAt();
             nextCursorOrderId = last.orderId();
         }
 
-        return OrderHistoryResponse.of(content, nextCursorOrderDate, nextCursorOrderId, hasNext);
+        return OrderHistoryResponse.of(orderHistoryRows, nextCursorOrderDate, nextCursorOrderId, hasNext);
     }
 
     @Transactional

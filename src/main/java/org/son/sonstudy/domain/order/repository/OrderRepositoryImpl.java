@@ -1,11 +1,14 @@
 package org.son.sonstudy.domain.order.repository;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.domain.delivery.model.Delivery;
+import org.son.sonstudy.domain.delivery.model.DeliveryStatus;
+import org.son.sonstudy.domain.order.business.response.OrderHistoryResponse;
 import org.son.sonstudy.domain.order.model.Order;
 import org.son.sonstudy.domain.product.model.Product;
 import org.son.sonstudy.domain.product.model.ProductOption;
@@ -22,7 +25,7 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<OrderHistoryRow> findOrderHistoryByCursor(
+    public List<OrderHistoryResponse.OrderHistoryItem> findOrderHistoryByCursor(
             String userId,
             LocalDateTime cursorOrderDate,
             String cursorOrderId,
@@ -36,7 +39,7 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
 
         return queryFactory
                 .select(Projections.constructor(
-                        OrderHistoryRow.class,
+                        OrderHistoryResponse.OrderHistoryItem.class,
                         order.getString("id"),
                         order.getDateTime("orderDate", LocalDateTime.class),
                         order.getEnum("status", org.son.sonstudy.domain.order.model.OrderStatus.class),
@@ -44,7 +47,10 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
                         productImage.getString("imageUrl"),
                         option.getNumber("size", Integer.class),
                         order.getNumber("cost", Integer.class).longValue(),
-                        delivery.getEnum("status", org.son.sonstudy.domain.delivery.model.DeliveryStatus.class),
+                        new CaseBuilder()
+                                .when(delivery.getEnum("status", DeliveryStatus.class).isNull())
+                                .then(DeliveryStatus.READY)
+                                .otherwise(delivery.getEnum("status", DeliveryStatus.class)),
                         delivery.getString("trackingNumber")
                 ))
                 .from(order)
