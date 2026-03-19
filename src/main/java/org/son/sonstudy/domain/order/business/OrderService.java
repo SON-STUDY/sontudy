@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.exception.CustomException;
 import org.son.sonstudy.domain.order.application.request.CheckoutRequest;
+import org.son.sonstudy.domain.order.application.request.OrderHistoryRequest;
 import org.son.sonstudy.domain.order.business.response.CheckoutResponse;
+import org.son.sonstudy.domain.order.business.response.OrderHistoryResponse;
 import org.son.sonstudy.domain.order.model.Order;
 import org.son.sonstudy.domain.order.repository.OrderRepository;
 import org.son.sonstudy.domain.payment.business.pg.PaymentApproveCommand;
@@ -20,6 +22,9 @@ import org.son.sonstudy.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -28,6 +33,30 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductOptionRepository productOptionRepository;
+
+    @Transactional(readOnly = true)
+    public OrderHistoryResponse getOrderHistory(String userId, OrderHistoryRequest request) {
+        int size = request.sizeOrDefault();
+        List<OrderHistoryResponse.OrderHistoryItem> orderHistories = orderRepository.findOrderHistoryByCursor(
+                userId,
+                request.cursorOrderDate(),
+                request.cursorOrderId(),
+                size
+        );
+        
+        boolean hasNext = orderHistories.size() > size;
+        List<OrderHistoryResponse.OrderHistoryItem> orderHistoryRows = hasNext ? orderHistories.subList(0, size) : orderHistories;
+
+        LocalDateTime nextCursorOrderDate = null;
+        String nextCursorOrderId = null;
+        if (hasNext && !orderHistoryRows.isEmpty()) {
+            OrderHistoryResponse.OrderHistoryItem last = orderHistoryRows.get(orderHistoryRows.size() - 1);
+            nextCursorOrderDate = last.orderedAt();
+            nextCursorOrderId = last.orderId();
+        }
+
+        return OrderHistoryResponse.of(orderHistoryRows, nextCursorOrderDate, nextCursorOrderId, hasNext);
+    }
 
     @Transactional
     public CheckoutResponse checkout(String userId, CheckoutRequest request) {
