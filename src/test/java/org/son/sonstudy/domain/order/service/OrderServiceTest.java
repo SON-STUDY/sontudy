@@ -3,12 +3,20 @@ package org.son.sonstudy.domain.order.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.son.sonstudy.common.api.code.ErrorCode;
+import org.son.sonstudy.common.exception.CustomException;
+import org.son.sonstudy.domain.order.application.request.CheckoutRequest;
 import org.son.sonstudy.domain.order.application.request.OrderHistoryRequest;
 import org.son.sonstudy.domain.order.business.OrderService;
+import org.son.sonstudy.domain.order.business.response.CheckoutResponse;
 import org.son.sonstudy.domain.order.business.response.OrderHistoryResponse;
 import org.son.sonstudy.domain.order.model.Order;
 import org.son.sonstudy.domain.order.model.OrderStatus;
 import org.son.sonstudy.domain.order.repository.OrderRepository;
+import org.son.sonstudy.domain.payment.model.Payment;
+import org.son.sonstudy.domain.payment.model.PaymentMethod;
+import org.son.sonstudy.domain.payment.model.PaymentStatus;
+import org.son.sonstudy.domain.payment.repository.PaymentRepository;
 import org.son.sonstudy.domain.product.model.Product;
 import org.son.sonstudy.domain.product.model.ProductCategory;
 import org.son.sonstudy.domain.product.model.ProductOption;
@@ -32,6 +40,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -43,6 +52,7 @@ public class OrderServiceTest {
     @Autowired private UserRepository userRepository;
 
     @Autowired private OrderRepository orderRepository;
+    @Autowired private PaymentRepository paymentRepository;
 
     @Autowired private ProductRepository productRepository;
 
@@ -59,6 +69,213 @@ public class OrderServiceTest {
         userSequence = 0;
         defaultProductOption = createProductOption();
         defaultUser = createUser("default");
+    }
+
+    @Nested
+    class 주문을_생성할_때 {
+
+        @Nested
+        class 유효한_요청이면 {
+
+            @Test
+            void 주문과_결제가_정상_처리된다() {
+                // given
+                String idempotencyKey = "checkout-success";
+                CheckoutRequest request = createCheckoutRequest(idempotencyKey);
+
+                // when
+                CheckoutResponse response = orderService.checkout(defaultUser.getId(), request);
+
+                // then
+                assertThat(response.orderId()).isNotNull();
+                assertThat(response.paymentId()).isNotNull();
+                assertThat(response.orderStatus()).isEqualTo(OrderStatus.PURCHASED);
+                assertThat(response.paymentStatus()).isEqualTo(PaymentStatus.PAID);
+                assertThat(response.failureCode()).isNull();
+                assertThat(response.failureMessage()).isNull();
+
+                assertThat(orderRepository.count()).isEqualTo(1); // 주문 저장 검증
+                Order savedOrder = orderRepository.findById(response.orderId()).orElseThrow();
+                assertThat(savedOrder.getUser().getId()).isEqualTo(defaultUser.getId());
+                assertThat(savedOrder.getProductOption().getId()).isEqualTo(defaultProductOption.getId());
+                assertThat(savedOrder.getCost()).isEqualTo(defaultProductOption.getCost());
+                assertThat(savedOrder.getStatus()).isEqualTo(OrderStatus.PURCHASED);
+
+                // payment 저장 검증
+                Payment savedPayment = paymentRepository.findByMerchantUid(idempotencyKey).orElseThrow();
+                assertThat(savedPayment.getStatus()).isEqualTo(PaymentStatus.PAID);
+                assertThat(savedPayment.getOrder()).isNotNull();
+                assertThat(savedPayment.getOrder().getId()).isEqualTo(savedOrder.getId());
+            }
+
+            @Test
+            void 동일_멱등키로_재요청하면_기존_결제결과를_반환한다() {
+                // given
+                String idempotencyKey = "checkout-idempotent";
+                CheckoutRequest request = createCheckoutRequest(idempotencyKey);
+
+                // when
+                CheckoutResponse firstResponse = orderService.checkout(defaultUser.getId(), request);
+                CheckoutResponse secondResponse = orderService.checkout(defaultUser.getId(), request);
+
+                // then
+                assertThat(secondResponse).isEqualTo(firstResponse);
+                assertThat(orderRepository.count()).isEqualTo(1);
+                assertThat(paymentRepository.count()).isEqualTo(1);
+                assertThat(firstResponse.orderId()).isNotNull();
+                assertThat(firstResponse.paymentId()).isNotNull();
+
+                Payment savedPayment = paymentRepository.findByMerchantUid(idempotencyKey).orElseThrow();
+                assertThat(savedPayment.getStatus()).isEqualTo(PaymentStatus.PAID);
+                assertThat(savedPayment.getOrder()).isNotNull();
+                assertThat(savedPayment.getOrder().getId()).isEqualTo(firstResponse.orderId());
+            }
+        }
+
+        @Nested
+        class 유효하지_않은_요청이면 {
+
+            @Test
+            void 존재하지_않는_사용자면_예외가_발생한다() {
+                // given
+                String idempotencyKey = "checkout-no-user";
+                CheckoutRequest request = createCheckoutRequest(idempotencyKey);
+
+                // when // then
+                assertThatThrownBy(() -> orderService.checkout("not-exist-user-id", request))
+                        .isInstanceOf(CustomException.class)
+                        .satisfies(throwable -> assertThat(((CustomException) throwable).getErrorCode())
+                                .isEqualTo(ErrorCode.USER_NOT_FOUND));
+                assertThat(orderRepository.count()).isZero();
+                assertThat(paymentRepository.findByMerchantUid(idempotencyKey)).isEmpty();
+            }
+
+            @Test
+            void 존재하지_않는_옵션이면_예외가_발생한다() {
+                // given
+                String idempotencyKey = "checkout-no-option";
+                CheckoutRequest request = new CheckoutRequest(
+                        "not-exist-option-id",
+                        PaymentMethod.CARD,
+                        150000L,
+                        idempotencyKey
+                );
+
+                // when // then
+                assertThatThrownBy(() -> orderService.checkout(defaultUser.getId(), request))
+                        .isInstanceOf(CustomException.class)
+                        .satisfies(throwable -> assertThat(((CustomException) throwable).getErrorCode())
+                                .isEqualTo(ErrorCode.NOT_FOUND));
+                assertThat(orderRepository.count()).isZero();
+                assertThat(paymentRepository.findByMerchantUid(idempotencyKey)).isEmpty();
+            }
+
+            @Test
+            void 결제금액이_옵션가격과_다르면_예외가_발생한다() {
+                // given
+                String idempotencyKey = "checkout-invalid-amount";
+                CheckoutRequest request = new CheckoutRequest(
+                        defaultProductOption.getId(),
+                        PaymentMethod.CARD,
+                        defaultProductOption.getCost() + 1L,
+                        idempotencyKey
+                );
+
+                // when & then
+                assertThatThrownBy(() -> orderService.checkout(defaultUser.getId(), request))
+                        .isInstanceOf(CustomException.class)
+                        .satisfies(throwable -> assertThat(((CustomException) throwable).getErrorCode())
+                                .isEqualTo(ErrorCode.BAD_REQUEST));
+                assertThat(orderRepository.count()).isZero();
+                assertThat(paymentRepository.findByMerchantUid(idempotencyKey)).isEmpty();
+            }
+
+            @Test
+            void 옵션이_판매중이_아니면_예외가_발생한다() {
+                // given
+                ProductOption notOnSaleOption = createProductOption(150000, 100, ProductStatus.END);
+                String idempotencyKey = "checkout-not-on-sale";
+                CheckoutRequest request = new CheckoutRequest(
+                        notOnSaleOption.getId(),
+                        PaymentMethod.CARD,
+                        (long) notOnSaleOption.getCost(),
+                        idempotencyKey
+                );
+
+                // when & then
+                assertThatThrownBy(() -> orderService.checkout(defaultUser.getId(), request))
+                        .isInstanceOf(CustomException.class)
+                        .satisfies(throwable -> assertThat(((CustomException) throwable).getErrorCode())
+                                .isEqualTo(ErrorCode.BAD_REQUEST));
+                assertThat(orderRepository.count()).isZero();
+                assertThat(paymentRepository.findByMerchantUid(idempotencyKey)).isEmpty();
+            }
+
+            @Test
+            void 옵션의_재고가_없으면_예외가_발생한다() {
+                // given
+                ProductOption noStockOption = createProductOption(150000, 0, ProductStatus.ON_SALE);
+                String idempotencyKey = "checkout-no-stock";
+                CheckoutRequest request = new CheckoutRequest(
+                        noStockOption.getId(),
+                        PaymentMethod.CARD,
+                        (long) noStockOption.getCost(),
+                        idempotencyKey
+                );
+
+                // when & then
+                assertThatThrownBy(() -> orderService.checkout(defaultUser.getId(), request))
+                        .isInstanceOf(CustomException.class)
+                        .satisfies(throwable -> assertThat(((CustomException) throwable).getErrorCode())
+                                .isEqualTo(ErrorCode.BAD_REQUEST));
+                assertThat(orderRepository.count()).isZero();
+                assertThat(paymentRepository.findByMerchantUid(idempotencyKey)).isEmpty();
+            }
+
+            @Test
+            void 같은_상품을_이미_주문했으면_예외가_발생한다() {
+                // given
+                orderRepository.save(Order.createPurchased(defaultUser, defaultProductOption, defaultProductOption.getCost()));
+                String idempotencyKey = "checkout-already-ordered";
+                CheckoutRequest request = createCheckoutRequest(idempotencyKey);
+
+                // when & then
+                assertThatThrownBy(() -> orderService.checkout(defaultUser.getId(), request))
+                        .isInstanceOf(CustomException.class)
+                        .satisfies(throwable -> assertThat(((CustomException) throwable).getErrorCode())
+                                .isEqualTo(ErrorCode.BAD_REQUEST));
+                assertThat(orderRepository.count()).isEqualTo(1);
+                assertThat(paymentRepository.findByMerchantUid(idempotencyKey)).isEmpty();
+            }
+        }
+
+        @Nested
+        class 결제승인이_실패하면 {
+
+            @Test
+            void 주문은_생성되지_않고_실패_결제정보를_반환한다() {
+                // given
+                String idempotencyKey = "checkout-pg-fail";
+                CheckoutRequest request = createCheckoutRequest(idempotencyKey.toUpperCase() + "-FAIL");
+
+                // when
+                CheckoutResponse response = orderService.checkout(defaultUser.getId(), request);
+
+                // then
+                assertThat(response.orderId()).isNull();
+                assertThat(response.orderStatus()).isNull();
+                assertThat(response.paymentId()).isNotNull();
+                assertThat(response.paymentStatus()).isEqualTo(PaymentStatus.FAILED);
+                assertThat(response.failureCode()).isEqualTo("FAKE_PG_DECLINED");
+                assertThat(response.failureMessage()).isEqualTo("Fake PG 결제 실패");
+                assertThat(orderRepository.count()).isZero();
+
+                Payment savedPayment = paymentRepository.findByMerchantUid(request.idempotencyKey()).orElseThrow();
+                assertThat(savedPayment.getStatus()).isEqualTo(PaymentStatus.FAILED);
+                assertThat(savedPayment.getOrder()).isNull();
+                assertThat(savedPayment.getFailureCode()).isEqualTo("FAKE_PG_DECLINED");
+            }
+        }
     }
 
     @Nested
@@ -170,6 +387,10 @@ public class OrderServiceTest {
     }
 
     private ProductOption createProductOption() {
+        return createProductOption(150000, 100, ProductStatus.ON_SALE);
+    }
+
+    private ProductOption createProductOption(int cost, int stock, ProductStatus status) {
         Color color = colorRepository.save(Color.builder()
                 .hexCode("#111111")
                 .colorName("Black")
@@ -193,13 +414,22 @@ public class OrderServiceTest {
 
         ProductOption option = ProductOption.builder()
                 .size(260)
-                .cost(150000)
-                .stock(100)
-                .status(ProductStatus.ON_SALE)
+                .cost(cost)
+                .stock(stock)
+                .status(status)
                 .build();
         option.setProduct(savedProduct);
 
         return productOptionRepository.save(option);
+    }
+
+    private CheckoutRequest createCheckoutRequest(String idempotencyKey) {
+        return new CheckoutRequest(
+                defaultProductOption.getId(),
+                PaymentMethod.CARD,
+                (long) defaultProductOption.getCost(),
+                idempotencyKey
+        );
     }
 
     private User createUser(String prefix) {
