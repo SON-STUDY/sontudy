@@ -14,6 +14,7 @@ import org.son.sonstudy.domain.product.business.response.ProductDetailResponse;
 import org.son.sonstudy.domain.product.business.response.ProductLiveResponse;
 import org.son.sonstudy.domain.product.business.response.ProductResponse;
 import org.son.sonstudy.domain.product.business.response.ScheduledDropsResponse;
+import org.son.sonstudy.domain.product.dto.ProductSearchFilter;
 import org.son.sonstudy.domain.product.model.ProductStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -40,15 +41,7 @@ public class ProductController {
 
         return ApiResponse.success(SuccessCode.PRODUCT_REGISTERED);
     }
-
-    @GetMapping
-    public ResponseEntity<ApiResponse<ProductResponse>> getAllProducts(
-            @PageableDefault(size = 10, sort = "releasedAt", direction = Sort.Direction.ASC) Pageable pageable
-    ) {
-        ProductResponse response = productService.findAllProducts(pageable);
-
-        return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
-    }
+    
 
     @GetMapping("/{productId}")
     public ResponseEntity<ApiResponse<ProductDetailResponse>> getProductDetail(
@@ -85,14 +78,13 @@ public class ProductController {
         return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
     }
 
-    @GetMapping("/brand")
-    public ResponseEntity<ApiResponse<ProductResponse>> getProductsByBrand(
-            @RequestParam String brand,
+    @GetMapping
+    public ResponseEntity<ApiResponse<ProductResponse>> getProducts(
+            ProductSearchFilter filter,
             @PageableDefault(size = 10, sort = "releasedAt", direction = Sort.Direction.ASC) Pageable pageable
-    ) {
-        ProductResponse response = productService.findAllProductsByBrand(brand, pageable);
+    ){
+        ProductResponse response = productService.findProducts(filter, pageable);
 
         return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
-
     }
 }
