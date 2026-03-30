@@ -3,13 +3,14 @@ package org.son.sonstudy.domain.product.repository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
+import org.springframework.util.StringUtils;
+import org.son.sonstudy.domain.product.dto.ProductSearchFilter;
 import org.son.sonstudy.domain.product.model.*;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -87,6 +88,33 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
+    @Override
+    public Page<Product> findProductsByFilter(ProductSearchFilter filter, Pageable pageable){
+        QProduct product = QProduct.product;
+
+        List<Product> content = queryFactory
+                .selectFrom(product)
+                .where(
+                        brandEq(filter.brand()),
+                        statusEq(filter.status())
+                )
+                .orderBy(product.releasedAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long total = queryFactory
+                .select(product.count())
+                .from(product)
+                .where(
+                        brandEq(filter.brand()),
+                        statusEq(filter.status())
+                )
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, total != null ? total : 0L);
+    }
+
     private BooleanBuilder buildCursorPredicate(
             QProduct product,
             LocalDateTime cursorReleasedAt,
@@ -101,5 +129,13 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
             );
         }
         return builder;
+    }
+
+    private BooleanExpression brandEq(String brand) {
+        return StringUtils.hasText(brand) ? QProduct.product.brand.equalsIgnoreCase(brand) : null;
+    }
+
+    private BooleanExpression statusEq(ProductStatus status) {
+        return status != null ? QProduct.product.status.eq(status) : null;
     }
 }
