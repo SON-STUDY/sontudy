@@ -81,7 +81,7 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<ApiResponse<ProductResponse>> getProducts(
             ProductSearchFilter filter,
-            @PageableDefault(size = 10, sort = "releasedAt", direction = Sort.Direction.ASC) Pageable pageable
+            @PageableDefault(size = 10, sort = "releasedAt", direction = Sort.Direction.DESC) Pageable pageable
     ){
         ProductResponse response = productService.findProducts(filter, pageable);
 
