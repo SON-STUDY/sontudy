@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.son.sonstudy.common.api.code.ErrorCode;
+import org.son.sonstudy.common.exception.CustomException;
 
 @Entity
 @Getter
@@ -30,5 +32,14 @@ public class Delivery {
         Delivery delivery = new Delivery();
         delivery.status = DeliveryStatus.READY;
         return delivery;
+    }
+
+    public void registerShipment(String courierCompany, String trackingNumber) {
+        if (this.status != DeliveryStatus.READY) {
+            throw new CustomException(ErrorCode.INVALID_DELIVERY_STATUS);
+        }
+        this.courierCompany = courierCompany;
+        this.trackingNumber = trackingNumber;
+        this.status = DeliveryStatus.DELIVERING;
     }
 }
