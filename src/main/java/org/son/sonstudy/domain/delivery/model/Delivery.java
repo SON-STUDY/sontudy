@@ -42,4 +42,11 @@ public class Delivery {
         this.trackingNumber = trackingNumber;
         this.status = DeliveryStatus.DELIVERING;
     }
+
+    public void complete() {
+        if (this.status != DeliveryStatus.DELIVERING) {
+            throw new CustomException(ErrorCode.INVALID_DELIVERY_STATUS);
+        }
+        this.status = DeliveryStatus.DELIVERED;
+    }
 }
