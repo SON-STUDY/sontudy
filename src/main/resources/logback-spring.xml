@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <!-- local / dev: Spring Boot 기본 콘솔 출력 -->
+    <springProfile name="local,dev">
+        <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <!-- prod: JSON 콘솔 + Loki 전송 -->
+    <springProfile name="prod">
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        </appender>
+
+        <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+            <http>
+                <url>${LOKI_URL:-http://localhost:3100}/loki/api/v1/push</url>
+            </http>
+            <format>
+                <label>
+                    <pattern>app=sonstudy,level=%level,env=prod</pattern>
+                </label>
+                <message>
+                    <pattern>%-5level [%thread] %logger{36} - %msg%n</pattern>
+                </message>
+            </format>
+        </appender>
+
+        <appender name="ASYNC_LOKI" class="ch.qos.logback.classic.AsyncAppender">
+            <discardingThreshold>0</discardingThreshold>
+            <queueSize>512</queueSize>
+            <appender-ref ref="LOKI"/>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE"/>
+            <appender-ref ref="ASYNC_LOKI"/>
+        </root>
+    </springProfile>
+
+</configuration>

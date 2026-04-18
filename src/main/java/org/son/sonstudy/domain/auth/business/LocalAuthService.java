@@ -1,6 +1,8 @@
 package org.son.sonstudy.domain.auth.business;
 
 import lombok.RequiredArgsConstructor;
+import org.son.sonstudy.common.aop.annotation.Loggable;
+import org.son.sonstudy.common.aop.annotation.LogCategory;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.exception.CustomException;
 import org.son.sonstudy.common.jwt.component.JwtProvider;
@@ -24,6 +26,7 @@ public class LocalAuthService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
 
+    @Loggable(category = LogCategory.AUTH, includeArgs = false)
     public TokenInfo login(String email, String rawPassword) {
 
         Authentication authentication = authenticationManager.authenticate(
@@ -39,6 +42,7 @@ public class LocalAuthService {
         return TokenInfo.of(accessToken, refreshToken);
     }
 
+    @Loggable(category = LogCategory.AUTH, includeArgs = false)
     public User signUp(String name, String email, String rawPassword, Role role) {
         String encodedPassword = createPassword(rawPassword);
 

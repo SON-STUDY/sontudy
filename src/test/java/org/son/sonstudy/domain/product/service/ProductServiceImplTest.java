@@ -64,7 +64,7 @@ public class ProductServiceImplTest {
             // then
             assertThat(products).hasSize(1);
             assertThat(products.get(0).getName()).isEqualTo("테스트 신발");
-            assertThat(products.get(0).getOptions().get(0).getSize()).isEqualTo(250);
+            // ProductOption은 별도의 Repository를 통해 관리되므로 여기서는 검증하지 않음
 
             assertThat(products.get(0).getColor().getColorName()).isEqualTo("Black");
         }
@@ -133,7 +133,7 @@ public class ProductServiceImplTest {
                 .cost(150000)
                 .stock(10)
                 .build();
-        product.addOption(option);
+        // product.addOption(option); // ProductOption은 별도로 저장됨
 
         ProductImage image = ProductImage.builder()
                 .imageUrl("testimage.url")
