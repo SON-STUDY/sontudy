@@ -1,6 +1,7 @@
 package org.son.sonstudy.common.aop;
 
 import lombok.extern.slf4j.Slf4j;
+import net.logstash.logback.argument.StructuredArguments;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -28,25 +29,18 @@ public class LoggingAspect {
 
         try {
             Object result = joinPoint.proceed();
-            long executionTime = System.currentTimeMillis() - startTime;
+            int executionTime = (int) (System.currentTimeMillis() - startTime);
 
             String resultLog = loggable.includeResult() ? " result=" + result : "";
-            log.info("[{}] {} 메서드 실행 성공. 실행시간={}ms{}{}",
+            log.info("[{}] {} 메서드 실행 성공.{}{}",
                     category.getDescription(),
                     methodName,
-                    executionTime,
                     argsLog,
-                    resultLog);
+                    resultLog,
+                    StructuredArguments.keyValue("executionTime", executionTime));
 
             return result;
         } catch (Throwable ex) {
-            long executionTime = System.currentTimeMillis() - startTime;
-            log.error("[{}] {} 메서드 실행 실패. 실행시간={}ms{} exception={}",
-                    category.getDescription(),
-                    methodName,
-                    executionTime,
-                    argsLog,
-                    ex.getMessage());
             throw ex;
         }
     }

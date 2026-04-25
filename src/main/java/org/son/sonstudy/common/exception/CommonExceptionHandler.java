@@ -21,7 +21,7 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException e){
-        log.error("[CustomException] 에러 코드: {}, 메시지: {}", e.getErrorCode(), e.getMessage());
+        log.warn("[CustomException] 에러 코드: {}, 메시지: {}", e.getErrorCode(), e.getMessage());
         return ApiResponse.fail(e.getErrorCode());
     }
 
