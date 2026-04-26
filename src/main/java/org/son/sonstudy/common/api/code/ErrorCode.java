@@ -38,7 +38,10 @@ public enum ErrorCode {
     INVALID_PRODUCT_SIZE("DC400_302", HttpStatus.BAD_REQUEST, "유효하지 않은 상품 사이즈입니다."),
     INVALID_STOCK("DC400_303", HttpStatus.BAD_REQUEST, "재고량은 음수가 될 수 없습니다."),
     INVALID_IMAGE_SIZE("DC400_304", HttpStatus.BAD_REQUEST, "상품 이미지는 1-10장 사이여야 합니다."),
-    INVALID_PRODUCT_STATE("DC400_305", HttpStatus.BAD_REQUEST , "상품 판매 상태가 정의되지 않았습니다." ),;
+    INVALID_PRODUCT_STATE("DC400_305", HttpStatus.BAD_REQUEST , "상품 판매 상태가 정의되지 않았습니다." ),
+
+    // DELIVERY
+    INVALID_DELIVERY_STATUS("DC400_501", HttpStatus.BAD_REQUEST, "현재 배송 상태에서는 해당 작업을 수행할 수 없습니다."),;
 
     private final String code;
     private final HttpStatus httpStatus;
