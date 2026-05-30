@@ -45,9 +45,7 @@ public class LoggingFilter extends OncePerRequestFilter {
             String userId = extractUserId();
 
             log.info(
-                    "[요청] {} {}",
-                    method,
-                    uri,
+                    "[요청] {} {} {} {}",
                     StructuredArguments.keyValue("method", method),
                     StructuredArguments.keyValue("uri", uri),
                     StructuredArguments.keyValue("ip", ip),
@@ -63,7 +61,7 @@ public class LoggingFilter extends OncePerRequestFilter {
             int status = wrappedResponse.getStatus();
 
             log.info(
-                    "[응답]",
+                    "[응답] {} {}",
                     StructuredArguments.keyValue("status", status),
                     StructuredArguments.keyValue("executionTime", (int) duration)
             );

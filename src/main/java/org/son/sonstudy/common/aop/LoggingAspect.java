@@ -32,12 +32,12 @@ public class LoggingAspect {
             int executionTime = (int) (System.currentTimeMillis() - startTime);
 
             String resultLog = loggable.includeResult() ? " result=" + result : "";
-            log.info("[{}] {} 메서드 실행 성공.{}{}",
+            log.info("[{}] {} 메서드 실행 성공 {}{}{}",
                     category.getDescription(),
                     methodName,
+                    StructuredArguments.keyValue("executionTime", executionTime),
                     argsLog,
-                    resultLog,
-                    StructuredArguments.keyValue("executionTime", executionTime));
+                    resultLog);
 
             return result;
         } catch (Throwable ex) {
