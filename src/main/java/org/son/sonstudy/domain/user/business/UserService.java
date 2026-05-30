@@ -1,6 +1,8 @@
 package org.son.sonstudy.domain.user.business;
 
 import lombok.RequiredArgsConstructor;
+import org.son.sonstudy.common.aop.annotation.Loggable;
+import org.son.sonstudy.common.aop.annotation.LogCategory;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.exception.CustomException;
 import org.son.sonstudy.common.jwt.data.TokenInfo;
@@ -28,6 +30,7 @@ public class UserService {
     private final LocalAuthService localAuthService;
 
     @Transactional
+    @Loggable(category = LogCategory.USER, includeArgs = false)
     public void signUp(String name, String email, String rawPassword, Role role) {
 
         User savedUser = localAuthService.signUp(name, email, rawPassword, role);
@@ -35,6 +38,7 @@ public class UserService {
     }
 
     @Transactional
+    @Loggable(category = LogCategory.AUTH, includeArgs = false)
     public SignUpResponse login(String email, String rawPassword) {
         TokenInfo tokenInfo = localAuthService.login(email, rawPassword);
 
@@ -42,6 +46,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    @Loggable(category = LogCategory.USER)
     public UserInfoResponse getUserInfo(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -50,6 +55,7 @@ public class UserService {
     }
 
     @Transactional
+    @Loggable(category = LogCategory.USER)
     public void applyForSeller(String userId) {
         if (sellerApplicationRepository.existsByUserIdAndStatus(userId, ApplicationStatus.PENDING)) {
             throw new CustomException(ErrorCode.ALREADY_APPLIED);
@@ -70,6 +76,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    @Loggable(category = LogCategory.USER)
     public List<SellerApplicationResponse> getPendingApplications() {
         return sellerApplicationRepository.findAllByStatus(ApplicationStatus.PENDING).stream()
                 .map(SellerApplicationResponse::from)
@@ -77,6 +84,7 @@ public class UserService {
     }
 
     @Transactional
+    @Loggable(category = LogCategory.USER)
     public void updateSellerApplicationStatus(String applicationId, ApplicationStatus status) {
         SellerApplication application = sellerApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_NOT_FOUND));

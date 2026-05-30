@@ -1,6 +1,8 @@
 package org.son.sonstudy.domain.auth.business;
 
 import lombok.RequiredArgsConstructor;
+import org.son.sonstudy.common.aop.annotation.Loggable;
+import org.son.sonstudy.common.aop.annotation.LogCategory;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.exception.CustomException;
 import org.son.sonstudy.common.jwt.component.JwtProvider;
