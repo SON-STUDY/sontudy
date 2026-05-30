@@ -65,7 +65,7 @@ public class LoggingFilter extends OncePerRequestFilter {
             log.info(
                     "[응답]",
                     StructuredArguments.keyValue("status", status),
-                    StructuredArguments.keyValue("duration", (int) duration)
+                    StructuredArguments.keyValue("executionTime", (int) duration)
             );
 
             wrappedResponse.copyBodyToResponse();

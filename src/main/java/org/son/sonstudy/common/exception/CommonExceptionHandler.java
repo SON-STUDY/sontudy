@@ -3,6 +3,7 @@ package org.son.sonstudy.common.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.api.response.ApiResponse;
+import org.son.sonstudy.common.logging.ExceptionLog;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,7 +22,7 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException e){
-        log.warn("[CustomException] 에러 코드: {}, 메시지: {}", e.getErrorCode(), e.getMessage());
+        log.warn("[CustomException]", ExceptionLog.of("CustomException").field("errorCode", e.getErrorCode().name()).field("message", e.getMessage()).build());
         return ApiResponse.fail(e.getErrorCode());
     }
 
@@ -29,51 +30,50 @@ public class CommonExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException e) {
         BindingResult bindingResult = e.getBindingResult();
         String firstErrorMessage = bindingResult.getAllErrors().get(0).getDefaultMessage();
-        
-        log.warn("[ValidationException] 유효성 검사 실패: {}", firstErrorMessage);
+
+        log.warn("[ValidationException]", ExceptionLog.of("ValidationException").field("message", firstErrorMessage).build());
         return ApiResponse.fail(ErrorCode.BAD_REQUEST, firstErrorMessage);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        log.warn("[HttpMessageNotReadableException] JSON 형식 오류: {}", e.getMessage());
+        log.warn("[HttpMessageNotReadableException]", ExceptionLog.of("HttpMessageNotReadableException").build());
         return ApiResponse.fail(ErrorCode.INVALID_JSON_FORMAT);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiResponse<Void>> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        log.warn("[HttpRequestMethodNotSupportedException] 지원하지 않는 HTTP 메서드: {}", e.getMethod());
+        log.warn("[HttpRequestMethodNotSupportedException]", ExceptionLog.of("HttpRequestMethodNotSupportedException").field("method", e.getMethod()).build());
         return ApiResponse.fail(ErrorCode.METHOD_NOT_ALLOWED);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        log.warn("[MethodArgumentTypeMismatchException] 파라미터 타입 불일치: 파라미터={}, 기대값={}, 받은값={}",
-                e.getName(), e.getRequiredType(), e.getValue());
+        log.warn("[MethodArgumentTypeMismatchException]", ExceptionLog.of("MethodArgumentTypeMismatchException").field("param", e.getName()).field("expectedType", e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : "unknown").build());
         return ApiResponse.fail(ErrorCode.PARAMETER_TYPE_MISMATCH);
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNoHandlerFoundException(NoHandlerFoundException e) {
-        log.warn("[NoHandlerFoundException] 요청 경로를 찾을 수 없음: {} {}", e.getHttpMethod(), e.getRequestURL());
+        log.warn("[NoHandlerFoundException]", ExceptionLog.of("NoHandlerFoundException").field("method", e.getHttpMethod()).field("url", e.getRequestURL()).build());
         return ApiResponse.fail(ErrorCode.NOT_FOUND);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException e) {
-        log.warn("[AccessDeniedException] 접근 권한 없음");
+        log.warn("[AccessDeniedException]", ExceptionLog.of("AccessDeniedException").build());
         return ApiResponse.fail(ErrorCode.FORBIDDEN_ACCESS);
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(AuthenticationException e) {
-        log.warn("[AuthenticationException] 인증 실패");
+        log.warn("[AuthenticationException]", ExceptionLog.of("AuthenticationException").build());
         return ApiResponse.fail(ErrorCode.AUTHENTICATION_FAILED);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleInternalServerException(Exception e) {
-        log.error("[InternalServerError] 예상치 못한 서버 오류 발생", e);
+        log.error("[InternalServerError]", ExceptionLog.of("InternalServerError").buildWithThrowable(e));
         return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 }
