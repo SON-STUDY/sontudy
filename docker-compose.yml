@@ -6,10 +6,10 @@ services:
       - "9099:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - LOKI_URL=http://loki:3100
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
     depends_on:
-      loki:
-        condition: service_started
+      db:
+        condition: service_healthy
     restart: "no"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
@@ -53,6 +53,24 @@ services:
       - loki
     restart: unless-stopped
 
+  db:
+    image: mysql:8.0
+    container_name: sonstudy-db
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=son_db
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
   loki:
     image: grafana/loki:2.9.0
     container_name: sonstudy-loki
@@ -76,6 +94,7 @@ services:
     restart: unless-stopped
 
 volumes:
+  mysql-data:
   prometheus-data:
   grafana-data:
   loki-data:
