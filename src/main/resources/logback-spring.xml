@@ -18,7 +18,11 @@
     <!-- prod: JSON 콘솔만 (Promtail이 stdout 수집) -->
     <springProfile name="prod">
         <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <fieldNames>
+                    <levelValue>[ignore]</levelValue>
+                </fieldNames>
+            </encoder>
         </appender>
 
         <logger name="org.son.sonstudy" level="INFO" additivity="false">

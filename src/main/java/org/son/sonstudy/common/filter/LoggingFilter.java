@@ -29,7 +29,10 @@ public class LoggingFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getRequestURI().startsWith("/actuator/");
+        String uri = request.getRequestURI();
+        return uri.startsWith("/actuator/")
+                || uri.startsWith("/swagger-ui/")
+                || uri.startsWith("/v3/api-docs");
     }
 
     @Override
@@ -48,13 +51,6 @@ public class LoggingFilter extends OncePerRequestFilter {
             String uri = request.getRequestURI();
             String userId = extractUserId();
 
-            log.info(
-                    "[요청] {} {} {}",
-                    StructuredArguments.keyValue("method", method),
-                    StructuredArguments.keyValue("uri", uri),
-                    StructuredArguments.keyValue("userId", userId)
-            );
-
             ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
             long startTime = System.currentTimeMillis();
 
@@ -64,7 +60,10 @@ public class LoggingFilter extends OncePerRequestFilter {
             int status = wrappedResponse.getStatus();
 
             log.info(
-                    "[응답] {} {}",
+                    "HTTP Request Processed",
+                    StructuredArguments.keyValue("method", method),
+                    StructuredArguments.keyValue("uri", uri),
+                    StructuredArguments.keyValue("userId", userId),
                     StructuredArguments.keyValue("status", status),
                     StructuredArguments.keyValue("executionTime", (int) duration)
             );
