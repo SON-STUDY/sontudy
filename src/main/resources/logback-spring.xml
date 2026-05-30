@@ -15,39 +15,16 @@
         </root>
     </springProfile>
 
-    <!-- prod: JSON 콘솔 + Loki 전송 -->
+    <!-- prod: JSON 콘솔만 (Promtail이 stdout 수집) -->
     <springProfile name="prod">
         <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
         </appender>
 
-        <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
-            <http>
-                <url>${LOKI_URL:-http://localhost:3100}/loki/api/v1/push</url>
-            </http>
-            <format>
-                <label>
-                    <pattern>app=sonstudy,level=%level,env=prod</pattern>
-                </label>
-                <message>
-                    <pattern>%-5level [%thread] %logger{36} - %msg%n</pattern>
-                </message>
-            </format>
-        </appender>
-
-        <appender name="ASYNC_LOKI" class="ch.qos.logback.classic.AsyncAppender">
-            <discardingThreshold>0</discardingThreshold>
-            <queueSize>512</queueSize>
-            <appender-ref ref="LOKI"/>
-        </appender>
-
-        <!-- 애플리케이션 로그만 Loki로 전송 -->
         <logger name="org.son.sonstudy" level="INFO" additivity="false">
             <appender-ref ref="JSON_CONSOLE"/>
-            <appender-ref ref="ASYNC_LOKI"/>
         </logger>
 
-        <!-- Spring 등 외부 라이브러리는 콘솔에만 WARN 이상 출력 -->
         <root level="WARN">
             <appender-ref ref="JSON_CONSOLE"/>
         </root>
