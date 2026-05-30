@@ -26,7 +26,6 @@ public class LocalAuthService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
 
-    @Loggable(category = LogCategory.AUTH, includeArgs = false)
     public TokenInfo login(String email, String rawPassword) {
 
         Authentication authentication = authenticationManager.authenticate(
@@ -42,7 +41,6 @@ public class LocalAuthService {
         return TokenInfo.of(accessToken, refreshToken);
     }
 
-    @Loggable(category = LogCategory.AUTH, includeArgs = false)
     public User signUp(String name, String email, String rawPassword, Role role) {
         String encodedPassword = createPassword(rawPassword);
 

@@ -36,12 +36,13 @@ public class LoggingFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         String traceId = generateTraceId();
+        String ip = extractIp(request);
         MDC.put(TRACE_ID_KEY, traceId);
+        MDC.put("ip", ip);
 
         try {
             String method = request.getMethod();
             String uri = request.getRequestURI();
-            String ip = extractIp(request);
             String userId = extractUserId();
 
             log.info(
