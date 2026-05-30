@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.argument.StructuredArguments;
 import org.slf4j.MDC;
 import org.son.sonstudy.common.jwt.data.UserContext;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,7 @@ import java.util.UUID;
 
 @Slf4j
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class LoggingFilter extends OncePerRequestFilter {
 
     private static final String TRACE_ID_KEY = "traceId";
@@ -46,10 +49,9 @@ public class LoggingFilter extends OncePerRequestFilter {
             String userId = extractUserId();
 
             log.info(
-                    "[요청] {} {} {} {}",
+                    "[요청] {} {} {}",
                     StructuredArguments.keyValue("method", method),
                     StructuredArguments.keyValue("uri", uri),
-                    StructuredArguments.keyValue("ip", ip),
                     StructuredArguments.keyValue("userId", userId)
             );
 

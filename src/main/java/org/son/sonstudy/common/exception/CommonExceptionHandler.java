@@ -14,7 +14,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.slf4j.MDC;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestControllerAdvice
@@ -23,7 +22,7 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException e){
-        log.warn("[CustomException]", ExceptionLog.of("CustomException").field("errorCode", e.getErrorCode().name()).field("message", e.getMessage()).build());
+        log.warn("[CustomException]", ExceptionLog.of("CustomException").field("errorCode", e.getErrorCode().name()).field("errorMessage", e.getMessage()).build());
         return ApiResponse.fail(e.getErrorCode());
     }
 
@@ -32,7 +31,7 @@ public class CommonExceptionHandler {
         BindingResult bindingResult = e.getBindingResult();
         String firstErrorMessage = bindingResult.getAllErrors().get(0).getDefaultMessage();
 
-        log.warn("[ValidationException]", ExceptionLog.of("ValidationException").field("message", firstErrorMessage).build());
+        log.warn("[ValidationException]", ExceptionLog.of("ValidationException").field("errorMessage", firstErrorMessage).build());
         return ApiResponse.fail(ErrorCode.BAD_REQUEST, firstErrorMessage);
     }
 
@@ -68,9 +67,7 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(AuthenticationException e) {
-        log.warn("[AuthenticationException]", ExceptionLog.of("AuthenticationException")
-                .field("ip", MDC.get("ip"))
-                .build());
+        log.warn("[AuthenticationException]", ExceptionLog.of("AuthenticationException").build());
         return ApiResponse.fail(ErrorCode.AUTHENTICATION_FAILED);
     }
 
