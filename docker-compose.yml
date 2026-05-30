@@ -57,7 +57,7 @@ services:
     image: mysql:8.0
     container_name: sonstudy-db
     ports:
-      - "3306:3306"
+      - "3366:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=son_db
