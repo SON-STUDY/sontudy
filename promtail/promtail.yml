@@ -25,14 +25,8 @@ scrape_configs:
       - json:
           expressions:
             level: level
-            message: message
             traceId: traceId
-            executionTime: executionTime
-            errorCode: errorCode
             exceptionType: exceptionType
       - labels:
           level:
-          traceId:
           exceptionType:
-      - output:
-          source: message
