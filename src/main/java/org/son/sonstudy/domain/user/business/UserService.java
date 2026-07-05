@@ -90,10 +90,13 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_NOT_FOUND));
 
         if (!application.getStatus().equals(ApplicationStatus.PENDING)) {
-            return;
+            throw new CustomException(ErrorCode.ALREADY_REVIEW_APPLICATION);
         }
 
         application.updateStatus(status);
-        application.getUser().approveSeller();
+
+        if (status == ApplicationStatus.APPROVED) {
+            application.getUser().approveSeller();
+        }
     }
 }
