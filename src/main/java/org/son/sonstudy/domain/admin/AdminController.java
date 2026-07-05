@@ -40,7 +40,7 @@ public class AdminController {
     }
 
     @PatchMapping("/seller-applications/{applicationId}/status")
-    public ResponseEntity<ApiResponse<Void>> approveSellerApplication(
+    public ResponseEntity<ApiResponse<Void>> reviewSellerApplication(
             @PathVariable String applicationId,
             @RequestBody ReviewRequest request
     ) {
