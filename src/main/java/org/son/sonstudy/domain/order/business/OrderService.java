@@ -99,6 +99,7 @@ public class OrderService {
 
         payment.attachOrder(order);
         payment.markPaid(gatewayResult.pgTransactionId());
+        productOption.decreaseStock(1);
         paymentRepository.save(payment);
 
         return toResponse(payment);
