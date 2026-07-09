@@ -10,6 +10,7 @@ import org.son.sonstudy.domain.delivery.business.tracker.DeliveryTrackingResult;
 import org.son.sonstudy.domain.delivery.model.Delivery;
 import org.son.sonstudy.domain.delivery.model.DeliveryStatus;
 import org.son.sonstudy.domain.order.model.Order;
+import org.son.sonstudy.domain.order.model.OrderStatus;
 import org.son.sonstudy.domain.order.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,10 @@ public class DeliveryService {
     public DeliveryShipmentResponse registerShipment(String orderId, DeliveryShipmentRequest request) {
         Order order = orderRepository.findWithDeliveryById(orderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+        if (order.getStatus() != OrderStatus.PURCHASED) {
+            throw new CustomException(ErrorCode.INVALID_ORDER_STATUS);
+        }
 
         Delivery delivery = order.getDelivery();
         delivery.registerShipment(request.courierCompany(), request.trackingNumber());

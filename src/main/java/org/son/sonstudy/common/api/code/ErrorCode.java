@@ -40,6 +40,9 @@ public enum ErrorCode {
     INVALID_IMAGE_SIZE("DC400_304", HttpStatus.BAD_REQUEST, "상품 이미지는 1-10장 사이여야 합니다."),
     INVALID_PRODUCT_STATE("DC400_305", HttpStatus.BAD_REQUEST , "상품 판매 상태가 정의되지 않았습니다." ),
 
+    // ORDER
+    INVALID_ORDER_STATUS("DC400_401", HttpStatus.BAD_REQUEST, "현재 주문 상태에서는 해당 작업을 수행할 수 없습니다."),
+
     // DELIVERY
     INVALID_DELIVERY_STATUS("DC400_501", HttpStatus.BAD_REQUEST, "현재 배송 상태에서는 해당 작업을 수행할 수 없습니다."),;
 
