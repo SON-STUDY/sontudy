@@ -100,4 +100,17 @@ public class Payment {
         this.failureMessage = failureMessage;
         this.approvedAt = null;
     }
+
+    public void recreateRequested(PaymentMethod method, Long amount) {
+        this.status = PaymentStatus.REQUESTED;
+        this.method = method;
+        this.amount = amount;
+        this.requestedAt = LocalDateTime.now();
+        this.approvedAt = null;
+        this.failedAt = null;
+        this.failureCode = null;
+        this.failureMessage = null;
+        this.pgTransactionId = null;
+        this.order = null;
+    }
 }
