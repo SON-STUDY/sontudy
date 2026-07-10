@@ -78,6 +78,7 @@ public class ProductServiceImpl implements ProductService {
                     .size(optionDto.size())
                     .cost(optionDto.cost())
                     .stock(optionDto.stock())
+                    .status(optionDto.status())
                     .build();
 
             option.setProduct(product);
