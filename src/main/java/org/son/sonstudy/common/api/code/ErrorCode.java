@@ -22,6 +22,7 @@ public enum ErrorCode {
     EMAIL_DUPLICATE("DC409_101", HttpStatus.CONFLICT, "이미 존재하는 이메일"),
     ALREADY_APPLIED("DC409_102", HttpStatus.CONFLICT, "이미 신청된 상태입니다."),
     ALREADY_SELLER_AUTHORIZED("DC409_103", HttpStatus.CONFLICT, "이미 판매 권한이 있는 사용자입니다."),
+    ALREADY_REVIEW_APPLICATION("DC409_104", HttpStatus.CONFLICT, "이미 리뷰한 신청서입니다."),
 
     // AUTH
     INVALID_TOKEN_FORMAT("DC400_201", HttpStatus.BAD_REQUEST, "유효하지 않은 JWT 토큰"),
