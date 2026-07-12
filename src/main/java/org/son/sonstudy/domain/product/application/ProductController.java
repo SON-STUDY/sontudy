@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.son.sonstudy.common.annotation.NullableUserId;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.api.code.SuccessCode;
 import org.son.sonstudy.common.exception.CustomException;
