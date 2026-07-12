@@ -2,6 +2,7 @@ package org.son.sonstudy.domain.product.application;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.son.sonstudy.common.annotation.NullableUserId;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.api.code.SuccessCode;
 import org.son.sonstudy.common.api.response.ApiResponse;
@@ -70,10 +71,9 @@ public class ProductController {
 
     @GetMapping("/live")
     public ResponseEntity<ApiResponse<ProductLiveResponse>> getLiveDrops(
-            @AuthenticationPrincipal(errorOnInvalidType = false) UserContext userContext,
+            @NullableUserId String userId,
             @PageableDefault(size = 3) Pageable pageable
     ) {
-        String userId = userContext.userId();
         ProductLiveResponse response = productService.findLiveDrops(userId, pageable);
         return ApiResponse.success(SuccessCode.PRODUCT_OK, response);
     }
