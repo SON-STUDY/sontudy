@@ -26,6 +26,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.son.sonstudy.common.aop.annotation.Loggable;
+import org.son.sonstudy.common.aop.annotation.LogCategory;
 
 import java.util.HashSet;
 import java.util.List;
@@ -45,6 +47,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @Loggable(category = LogCategory.PRODUCT)
     public void register(String userId, ProductRegistrationRequest request) {
         validateImageSize(request.imageUrls().size());
 
@@ -85,6 +88,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
+    @Loggable(category = LogCategory.PRODUCT, includeArgs = false)
     public ProductResponse findProducts(ProductSearchFilter filter, Pageable pageable){
         Page<Product> products = productRepository.findProductsByFilter(filter, pageable);
 
@@ -94,6 +98,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
+    @Loggable(category = LogCategory.PRODUCT)
     public ProductDetailResponse findProductDetail(String productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
@@ -105,6 +110,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
+    @Loggable(category = LogCategory.PRODUCT)
     public ScheduledDropsResponse findScheduledDrops(String userId, ScheduledDropsRequest request) {
         int size = request.size() != null ? request.size() : 5;
         List<Product> products = productRepository.findScheduledDropsByCursor(
@@ -148,6 +154,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
+    @Loggable(category = LogCategory.PRODUCT)
     public ProductLiveResponse findLiveDrops(String userId, Pageable pageable) {
         Slice<Product> slice = productRepository.findLiveDrops(userId, pageable);
 

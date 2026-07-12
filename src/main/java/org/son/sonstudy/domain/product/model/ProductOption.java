@@ -32,6 +32,9 @@ public class ProductOption {
     @Column(nullable = false)
     private Long totalSales;
 
+    @Version
+    private Long version;
+
     @Enumerated(EnumType.STRING)
     private ProductStatus status;
 
@@ -47,6 +50,16 @@ public class ProductOption {
         this.stock = stock;
         this.totalSales = 0L;
         this.status = status;
+    }
+
+    public void decreaseStock(int quantity) {
+        if (this.stock - quantity < 0) {
+            throw new CustomException(ErrorCode.OUT_OF_STOCK);
+        }
+        this.stock -= quantity;
+        if (this.stock == 0) {
+            this.status = ProductStatus.SOLD_OUT;
+        }
     }
 
     private void validateSize(int size) {

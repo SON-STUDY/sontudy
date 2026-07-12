@@ -1,6 +1,8 @@
 package org.son.sonstudy.domain.order.business;
 
 import lombok.RequiredArgsConstructor;
+import org.son.sonstudy.common.aop.annotation.Loggable;
+import org.son.sonstudy.common.aop.annotation.LogCategory;
 import org.son.sonstudy.common.api.code.ErrorCode;
 import org.son.sonstudy.common.exception.CustomException;
 import org.son.sonstudy.domain.order.application.request.CheckoutRequest;
@@ -35,6 +37,7 @@ public class OrderService {
     private final ProductOptionRepository productOptionRepository;
 
     @Transactional(readOnly = true)
+    @Loggable(category = LogCategory.ORDER)
     public OrderHistoryResponse getOrderHistory(String userId, OrderHistoryRequest request) {
         int size = request.sizeOrDefault();
         List<OrderHistoryResponse.OrderHistoryItem> orderHistories = orderRepository.findOrderHistoryByCursor(
@@ -59,6 +62,7 @@ public class OrderService {
     }
 
     @Transactional
+    @Loggable(category = LogCategory.ORDER)
     public CheckoutResponse checkout(String userId, CheckoutRequest request) {
         Payment existingPayment = paymentRepository.findByMerchantUid(request.idempotencyKey()).orElse(null);
         if (existingPayment != null) {
@@ -95,6 +99,7 @@ public class OrderService {
 
         payment.attachOrder(order);
         payment.markPaid(gatewayResult.pgTransactionId());
+        productOption.decreaseStock(1);
         paymentRepository.save(payment);
 
         return toResponse(payment);
