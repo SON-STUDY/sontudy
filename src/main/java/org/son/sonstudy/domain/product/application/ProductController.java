@@ -100,10 +100,9 @@ public class ProductController {
     })
     @GetMapping("/live")
     public ResponseEntity<org.son.sonstudy.common.api.response.ApiResponse<ProductLiveResponse>> getLiveDrops(
-            @AuthenticationPrincipal(errorOnInvalidType = false) UserContext userContext,
+            @NullableUserId String userId,
             @PageableDefault(size = 3) Pageable pageable
     ) {
-        String userId = userContext.userId();
         ProductLiveResponse response = productService.findLiveDrops(userId, pageable);
         return org.son.sonstudy.common.api.response.ApiResponse.success(SuccessCode.PRODUCT_OK, response);
     }

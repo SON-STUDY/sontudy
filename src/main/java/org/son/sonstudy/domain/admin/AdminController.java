@@ -67,7 +67,7 @@ public class AdminController {
             @ApiResponse(responseCode = "404", description = "신청서를 찾을 수 없음")
     })
     @PatchMapping("/seller-applications/{applicationId}/status")
-    public ResponseEntity<org.son.sonstudy.common.api.response.ApiResponse<Void>> approveSellerApplication(
+    public ResponseEntity<org.son.sonstudy.common.api.response.ApiResponse<Void>> reviewSellerApplication(
             @PathVariable String applicationId,
             @RequestBody ReviewRequest request
     ) {

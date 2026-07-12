@@ -22,6 +22,7 @@ public enum ErrorCode {
     EMAIL_DUPLICATE("DC409_101", HttpStatus.CONFLICT, "이미 존재하는 이메일"),
     ALREADY_APPLIED("DC409_102", HttpStatus.CONFLICT, "이미 신청된 상태입니다."),
     ALREADY_SELLER_AUTHORIZED("DC409_103", HttpStatus.CONFLICT, "이미 판매 권한이 있는 사용자입니다."),
+    ALREADY_REVIEW_APPLICATION("DC409_104", HttpStatus.CONFLICT, "이미 리뷰한 신청서입니다."),
 
     // AUTH
     INVALID_TOKEN_FORMAT("DC400_201", HttpStatus.BAD_REQUEST, "유효하지 않은 JWT 토큰"),
@@ -40,6 +41,9 @@ public enum ErrorCode {
     INVALID_IMAGE_SIZE("DC400_304", HttpStatus.BAD_REQUEST, "상품 이미지는 1-10장 사이여야 합니다."),
     INVALID_PRODUCT_STATE("DC400_305", HttpStatus.BAD_REQUEST , "상품 판매 상태가 정의되지 않았습니다." ),
     OUT_OF_STOCK("DC400_306", HttpStatus.BAD_REQUEST, "재고가 부족합니다."),
+
+    // ORDER
+    INVALID_ORDER_STATUS("DC400_401", HttpStatus.BAD_REQUEST, "현재 주문 상태에서는 해당 작업을 수행할 수 없습니다."),
 
     // DELIVERY
     INVALID_DELIVERY_STATUS("DC400_501", HttpStatus.BAD_REQUEST, "현재 배송 상태에서는 해당 작업을 수행할 수 없습니다."),;
