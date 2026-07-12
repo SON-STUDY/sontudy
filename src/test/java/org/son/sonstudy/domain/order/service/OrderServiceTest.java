@@ -276,6 +276,44 @@ public class OrderServiceTest {
                 assertThat(savedPayment.getFailureCode()).isEqualTo("FAKE_PG_DECLINED");
             }
         }
+
+        @Nested
+        class 실패한_결제를_재시도하면 {
+
+            @Test
+            void 기존_실패_레코드를_재활용하여_결제승인을_재시도하고_성공하면_주문이_생성된다() {
+                // given
+                String idempotencyKey = "checkout-retry-success";
+
+                Payment failedPayment = Payment.createRequested(
+                        idempotencyKey,
+                        PaymentMethod.CARD,
+                        (long) defaultProductOption.getCost()
+                );
+                failedPayment.markFailed("TEMP_ERR", "임시 결제 실패");
+                paymentRepository.save(failedPayment);
+
+                CheckoutRequest request = createCheckoutRequest(idempotencyKey);
+
+                // when
+                CheckoutResponse response = orderService.checkout(defaultUser.getId(), request);
+
+                // then
+                assertThat(response.orderId()).isNotNull();
+                assertThat(response.orderStatus()).isEqualTo(OrderStatus.PURCHASED);
+                assertThat(response.paymentId()).isEqualTo(failedPayment.getId());
+                assertThat(response.paymentStatus()).isEqualTo(PaymentStatus.PAID);
+                assertThat(response.failureCode()).isNull();
+                assertThat(response.failureMessage()).isNull();
+
+                assertThat(paymentRepository.count()).isEqualTo(1);
+
+                Payment savedPayment = paymentRepository.findByMerchantUid(idempotencyKey).orElseThrow();
+                assertThat(savedPayment.getStatus()).isEqualTo(PaymentStatus.PAID);
+                assertThat(savedPayment.getOrder()).isNotNull();
+                assertThat(savedPayment.getOrder().getId()).isEqualTo(response.orderId());
+            }
+        }
     }
 
     @Nested

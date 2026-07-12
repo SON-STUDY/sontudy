@@ -15,6 +15,7 @@ import org.son.sonstudy.domain.payment.business.pg.PaymentApproveCommand;
 import org.son.sonstudy.domain.payment.business.pg.PaymentGateway;
 import org.son.sonstudy.domain.payment.business.pg.PaymentGatewayResult;
 import org.son.sonstudy.domain.payment.model.Payment;
+import org.son.sonstudy.domain.payment.model.PaymentStatus;
 import org.son.sonstudy.domain.payment.repository.PaymentRepository;
 import org.son.sonstudy.domain.product.model.ProductOption;
 import org.son.sonstudy.domain.product.model.ProductStatus;
@@ -65,7 +66,7 @@ public class OrderService {
     @Loggable(category = LogCategory.ORDER)
     public CheckoutResponse checkout(String userId, CheckoutRequest request) {
         Payment existingPayment = paymentRepository.findByMerchantUid(request.idempotencyKey()).orElse(null);
-        if (existingPayment != null) {
+        if (existingPayment != null && existingPayment.getStatus() != PaymentStatus.FAILED) {
             return toResponse(existingPayment);
         }
 
@@ -76,11 +77,17 @@ public class OrderService {
 
         validateCheckoutRequest(userId, request, productOption);
 
-        Payment payment = Payment.createRequested(
-                request.idempotencyKey(),
-                request.paymentMethod(),
-                request.amount()
-        );
+        Payment payment;
+        if (existingPayment != null) {
+            payment = existingPayment;
+            payment.recreateRequested(request.paymentMethod(), request.amount());
+        } else {
+            payment = Payment.createRequested(
+                    request.idempotencyKey(),
+                    request.paymentMethod(),
+                    request.amount()
+            );
+        }
         paymentRepository.save(payment);
 
         PaymentGatewayResult gatewayResult = paymentGateway.approve(new PaymentApproveCommand(
