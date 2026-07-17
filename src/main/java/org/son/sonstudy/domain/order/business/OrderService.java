@@ -66,7 +66,7 @@ public class OrderService {
     @Loggable(category = LogCategory.ORDER)
     public CheckoutResponse checkout(String userId, CheckoutRequest request) {
         Payment existingPayment = paymentRepository.findByMerchantUid(request.idempotencyKey()).orElse(null);
-        if (existingPayment != null && existingPayment.getStatus() != PaymentStatus.FAILED) {
+        if (isAlreadyProcessed(existingPayment)) {
             return toResponse(existingPayment);
         }
 
@@ -77,24 +77,35 @@ public class OrderService {
 
         validateCheckoutRequest(userId, request, productOption);
 
-        Payment payment;
-        if (existingPayment != null) {
-            payment = existingPayment;
-            payment.recreateRequested(request.paymentMethod(), request.amount());
-        } else {
-            payment = Payment.createRequested(
-                    request.idempotencyKey(),
-                    request.paymentMethod(),
-                    request.amount()
-            );
-        }
+        Payment payment = getOrCreatePayment(existingPayment, request);
         paymentRepository.save(payment);
 
+        return processPaymentApproval(user, productOption, payment, request);
+    }
+
+    private boolean isAlreadyProcessed(Payment payment) {
+        return payment != null && payment.getStatus() != PaymentStatus.FAILED;
+    }
+
+    private Payment getOrCreatePayment(Payment existingPayment, CheckoutRequest request) {
+        if (existingPayment != null) {
+            existingPayment.recreateRequested(request.paymentMethod(), request.amount());
+            return existingPayment;
+        }
+        return Payment.createRequested(
+                request.idempotencyKey(),
+                request.paymentMethod(),
+                request.amount()
+        );
+    }
+
+    private CheckoutResponse processPaymentApproval(User user, ProductOption productOption, Payment payment, CheckoutRequest request) {
         PaymentGatewayResult gatewayResult = paymentGateway.approve(new PaymentApproveCommand(
                 request.idempotencyKey(),
                 request.paymentMethod(),
                 request.amount()
         ));
+
         if (!gatewayResult.success()) {
             payment.markFailed(gatewayResult.failureCode(), gatewayResult.failureMessage());
             paymentRepository.save(payment);
